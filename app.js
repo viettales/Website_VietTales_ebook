@@ -41,7 +41,7 @@ function page(key){
           folkMap.invalidateSize({pan:false});
 
           if(!$('map-region')?.value){
-            showWholevietnam();
+            showWholeVietnam();
           }
         }
       });
@@ -109,22 +109,30 @@ function renderHistoricalRegionMarkers() {
       'Khu vực văn hóa được ghi nhận theo địa danh lịch sử.'
     );
 
-    marker.on('click', function () {
-      const selector = $('map-region');
+   marker.on('click', function () {
+  const selector = $('map-region');
 
-      if (selector) selector.value = place.key;
+  if (selector) selector.value = place.key;
 
-      folkMap.stop();
+  renderFolkMapMarkers();
 
-      folkMap.fitBounds(place.bounds, {
-        padding: [25, 25],
-        maxZoom: 10,
-        animate: false
-      });
+  folkMap.stop();
 
-      renderFolkMapMarkers();
-      marker.openPopup();
-    });
+  const region = folkRegions[place.key];
+
+  if (region && region.bounds) {
+    const [minLat, maxLat, minLng, maxLng] = region.bounds;
+
+    folkMap.fitBounds(
+      [[minLat, minLng], [maxLat, maxLng]],
+      { padding: [25, 25], maxZoom: 10, animate: false }
+    );
+  } else {
+    folkMap.setView(place.position, 9, { animate: false });
+  }
+
+  marker.openPopup();
+});
 
     folkRegionMarkersLayer.addLayer(marker);
   });
@@ -289,15 +297,23 @@ if (!$('map-region')?.value) {
   });
 }
 
+
 function showWholeVietnam() {
   if (!folkMap) return;
 
-  folkMap.fitBounds(VIETNAM_BOUNDS, {
-    padding: [20, 20],
-    maxZoom: 6,
-    animate: false
-  });
+  folkMap.fitBounds(
+    [
+      [8.0, 102.0],
+      [24.0, 110.0]
+    ],
+    {
+      padding: [20, 20],
+      maxZoom: 6,
+      animate: false
+    }
+  );
 }
+
 
 function renderFolkMapMarkers() {
   if (!folkMap) return;
@@ -380,26 +396,6 @@ function renderFolkMapMarkers() {
   }
 
 
-if (region) {
-  const info = folkRegions[region];
-
-  if (info && info.bounds) {
-    const [minLat, maxLat, minLng, maxLng] = info.bounds;
-
-    folkMap.fitBounds(
-      [[minLat, minLng], [maxLat, maxLng]],
-      {
-        padding: [25, 25],
-        maxZoom: 10,
-        animate: false
-      }
-    );
-  } else if (info) {
-    folkMap.setView(info.center, 9, { animate: false });
-  }
-} else {
-  folkMap.setView([16.0, 106.0], 6, { animate: false });
-}
 }
 function filterFolkMap() {
   renderFolkMapMarkers();
