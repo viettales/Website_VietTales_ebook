@@ -54,14 +54,26 @@ async function loadVietnamBoundaries() {
   vietnamBoundaryLoading = true;
 
   try {
-    const response = await fetch('./vietnam-provinces.geojson');
+  const url = new URL(
+  'https://services9.arcgis.com/6EuFgO4fLTqfNOhu/ArcGIS/rest/services/Indochina_Provincial_Boundaries/FeatureServer/0/query'
+);
+
+url.searchParams.set('where', '1=1');
+url.searchParams.set('outFields', '*');
+url.searchParams.set('outSR', '4326');
+url.searchParams.set('returnGeometry', 'true');
+url.searchParams.set('f', 'geojson');
+
+const response = await fetch(url.toString());
 
     if (!response.ok) {
       throw new Error('Không tải được file GeoJSON.');
     }
 
     const data = await response.json();
-
+    if (!data.features || data.features.length === 0) {
+      throw new Error('Dữ liệu ranh giới không có tỉnh nào.');
+    }
     const boundaryPane = folkMap.getPane('provinceBoundaryPane')
       || folkMap.createPane('provinceBoundaryPane');
 
@@ -321,7 +333,7 @@ function initFolkMap() {
         attribution: '&copy; OpenStreetMap contributors'
       }
     ).addTo(folkMap);
-    loadVietnamBoundaries();
+     loadVietnamBoundaries();
 renderHistoricalRegionMarkers();
 
     // Đánh dấu vị trí khái quát của hai quần đảo.
@@ -344,7 +356,7 @@ renderHistoricalRegionMarkers();
         fillColor: '#d9a441',
         fillOpacity: 1
       }).addTo(folkMap);
-
+  
       marker.bindTooltip(island.name, {
         permanent: true,
         direction: 'right',
