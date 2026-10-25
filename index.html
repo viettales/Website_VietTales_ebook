@@ -1,4 +1,16 @@
-<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Di sản truyện dân gian địa phương</title><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="style.css"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="https://unpkg.com/mammoth@1.8.0/mammoth.browser.min.js"></script><script src="config.js"></script><script defer src="app.js"></script></head><body><div class="stripe"></div><header>
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Di sản truyện dân gian địa phương</title><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="style.css">
+  
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://unpkg.com/mammoth@1.8.0/mammoth.browser.min.js"></script>
+<script src="config.js"></script>
+<script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+crossorigin=""></script>
+<script defer src="app.js"></script>
+
+</head><body><div class="stripe"></div><header>
   
 <a class="brand" href="#trang-chu">
   <img src="logo khkt.png" alt="Logo VietTales" class="brand-logo">
@@ -12,7 +24,10 @@
   <nav id="nav"><a href="#gioi-thieu" data-page="gioi-thieu">Giới Thiệu</a><a href="#trang-chu" data-page="trang-chu">Trang chủ</a><a href="#truyen-thuyet" data-page="truyen-thuyet">Truyền Thuyết</a><a href="#truyen-cuoi" data-page="truyen-cuoi">Truyện Cười</a><a href="#truyen-co-tich" data-page="truyen-co-tich">Truyện Cổ Tích</a>
 <a href="#truyen-dia-phuong" data-page="truyen-dia-phuong">Truyện Giải Thích Địa Phương</a>
 <a href="#truyen-ngu-ngon" data-page="truyen-ngu-ngon">Truyện Ngụ Ngôn</a>
+
+<a href="#ban-do-so" data-page="ban-do-so">Bản đồ số</a>
 <a href="#tai-khoan" data-page="tai-khoan">Góc đọc của tôi</a>
+
   </nav>
 <button id="open-auth" class="login">Đăng nhập</button></header><main>
 <section class="page" data-section="trang-chu"><div class="hero">
@@ -80,6 +95,37 @@
 <div class="quote">
   “Giữ gìn truyện xưa là giữ gìn ký ức, bản sắc và tâm hồn của quê hương.”
 </div>
+</section>
+  
+<section class="page" data-section="ban-do-so">
+  <div class="banner">
+    <span class="eyebrow">DI SẢN VĂN HÓA ĐỊA PHƯƠNG</span>
+    <h1>Bản đồ số truyện dân gian</h1>
+    <p>Khám phá những câu chuyện dân gian gắn liền với các địa danh thuộc vùng Trà Vinh, Bến Tre và Vĩnh Long trước đây.</p>
+  </div>
+
+  <div class="content">
+    <div class="section-title">
+      <span class="eyebrow">KHÔNG GIAN VĂN HÓA</span>
+      <h2>Khám phá truyện theo địa điểm</h2>
+      <p>Chọn một địa điểm trên bản đồ để tìm hiểu câu chuyện gắn với vùng đất ấy.</p>
+    </div>
+
+    <div class="map-filters">
+      <label for="map-region">Khu vực:</label>
+      <select id="map-region">
+        <option value="">Tất cả khu vực</option>
+        <option value="tra-vinh">Trà Vinh trước đây</option>
+        <option value="ben-tre">Bến Tre trước đây</option>
+        <option value="vinh-long">Vĩnh Long trước đây</option>
+      </select>
+    </div>
+
+    <div id="folk-map" role="region" aria-label="Bản đồ số truyện dân gian"></div>
+    <div id="map-story-details" aria-live="polite">
+      <p>Chọn một điểm đánh dấu trên bản đồ để xem thông tin truyện.</p>
+    </div>
+  </div>
 </section>
 <section class="page" data-section="gioi-thieu"><div class="banner"><span class="eyebrow">VỀ DỰ ÁN</span><h1>Giới Thiệu</h1><p>Đưa những câu chuyện dân gian địa phương đến gần hơn với thế hệ hôm nay.</p></div><article class="intro"><span class="eyebrow">LỜI NÓI ĐẦU</span><h2>Lời Nói Đầu</h2><p>Website “Mô hình số hóa truyện dân gian địa phương” được xây dựng nhằm lưu trữ, hệ thống hóa và giới thiệu các truyện dân gian của địa phương trong môi trường số.</p><p>Mục tiêu của website là góp phần bảo tồn và lan tỏa giá trị văn hóa truyền thống, đồng thời hỗ trợ học tập theo định hướng Chương trình Giáo dục phổ thông 2018, giúp học sinh tiếp cận văn học dân gian một cách thuận tiện và hiệu quả hơn.</p><p>Đối tượng sử dụng của website bao gồm học sinh trung học phổ thông, giáo viên và những người quan tâm đến văn hóa dân gian địa phương.</p><p>Nội dung website tập trung vào các thể loại truyện dân gian như truyền thuyết, cổ tích, truyện cười, giai thoại, truyện danh nhân và truyện giải thích địa danh của địa phương.</p><p>Sản phẩm không chỉ hỗ trợ việc tra cứu và học tập mà còn góp phần nâng cao năng lực văn học, năng lực số và ý thức gìn giữ di sản văn hóa trong cộng đồng, đặc biệt trong bối cảnh chuyển đổi số hiện nay.</p><div class="note"><b>✦ Mục tiêu của chúng tôi</b><br>Gìn giữ những giá trị văn hóa được trao truyền qua các thế hệ và tạo không gian số để cộng đồng cùng khám phá, học tập, chia sẻ.</div></article></section>
 <section class="page" data-section="truyen-thuyet"><div class="banner"><span class="eyebrow">THỂ LOẠI TRUYỆN DÂN GIAN</span><h1>Thể Loại Truyền Thuyết</h1><p><b>Truyền thuyết</b> là thể loại văn học dân gian kể về các nhân vật, sự kiện lịch sử hoặc giải thích nguồn gốc địa danh, sản vật qua yếu tố tưởng tượng, kỳ ảo. Tác phẩm không chỉ thể hiện thái độ, đánh giá của nhân dân đối với lịch sử mà còn gửi gắm niềm tự hào và tình yêu quê hương, đất nước.</p></div><div class="content"><div class="section-title"><span class="eyebrow">KHO TƯ LIỆU</span><h2>Truyện truyền thuyết</h2></div><div class="grid category-grid" data-category="Truyền Thuyết"></div></div></section>
