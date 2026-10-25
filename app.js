@@ -68,6 +68,7 @@ function removeVietnamBoundaries() {
   vietnamBoundaryLoading = false;
 }
 
+
 function renderHistoricalRegionMarkers() {
   if (!folkMap || folkRegionMarkersLayer) return;
 
@@ -113,12 +114,18 @@ function renderHistoricalRegionMarkers() {
         filterFolkMap();
       }
 
-      folkMap.setView(place.position, 9);
+      folkMap.flyTo(place.position, 11, {
+        animate: true,
+        duration: 1.2
+      });
+
+      marker.openPopup();
     });
 
     folkRegionMarkersLayer.addLayer(marker);
   });
 }
+
 
 function getIllustrativePoint(story) {
   const region = folkRegions[story.region];
