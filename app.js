@@ -45,7 +45,6 @@ let folkIslandMarkers = [];
 let vietnamBoundaryLayer = null;
 let folkRegionMarkersLayer = null;
 let vietnamBoundaryLoading = false;
-  
 function removeVietnamBoundaries() {
   if (folkMap && vietnamBoundaryLayer) {
     folkMap.removeLayer(vietnamBoundaryLayer);
