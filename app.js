@@ -46,108 +46,6 @@ let vietnamBoundaryLayer = null;
 let folkRegionMarkersLayer = null;
 let vietnamBoundaryLoading = false;
   
-async function loadVietnamBoundaries() {
-  if (!folkMap || vietnamBoundaryLayer || vietnamBoundaryLoading) {
-    return;
-  }
-
-  vietnamBoundaryLoading = true;
-
-  try {
-  const url = new URL(
-  'https://services9.arcgis.com/6EuFgO4fLTqfNOhu/ArcGIS/rest/services/Indochina_Provincial_Boundaries/FeatureServer/0/query'
-);
-
-url.searchParams.set('where', '1=1');
-url.searchParams.set('outFields', '*');
-url.searchParams.set('outSR', '4326');
-url.searchParams.set('returnGeometry', 'true');
-url.searchParams.set('f', 'geojson');
-
-const response = await fetch(url.toString());
-
-    if (!response.ok) {
-      throw new Error('Không tải được file GeoJSON.');
-    }
-
-    const data = await response.json();
-    if (!data.features || data.features.length === 0) {
-      throw new Error('Dữ liệu ranh giới không có tỉnh nào.');
-    }
-    const boundaryPane = folkMap.getPane('provinceBoundaryPane')
-      || folkMap.createPane('provinceBoundaryPane');
-
-    boundaryPane.style.zIndex = 350;
-    boundaryPane.style.pointerEvents = 'auto';
-
-    vietnamBoundaryLayer = L.geoJSON(data, {
-      pane: 'provinceBoundaryPane',
-
-      style: {
-        color: '#8c5c43',
-        weight: 1.3,
-        opacity: 0.9,
-        fillColor: '#e6cda7',
-        fillOpacity: 0.13
-      },
-
-      onEachFeature: function (feature, layer) {
-        const p = feature.properties || {};
-
-        const name =
-          p.name ||
-          p.NAME_1 ||
-          p.NAME ||
-          p.ten_tinh ||
-          p.TenTinh ||
-          p.province ||
-          p.province_name ||
-          p.shapeName ||
-          p.NAME_0 ||
-          'Khu vực hành chính';
-
-        layer.bindTooltip(String(name), {
-          sticky: true,
-          direction: 'auto'
-        });
-
-        layer.on({
-          mouseover: function () {
-            layer.setStyle({
-              weight: 2.5,
-              color: '#813c33',
-              fillOpacity: 0.3
-            });
-          },
-
-          mouseout: function () {
-            vietnamBoundaryLayer.resetStyle(layer);
-          }
-        });
-      }
-    });
-
-    vietnamBoundaryLayer.addTo(folkMap);
-    vietnamBoundaryLoading = false;
-
-  } catch (error) {
-    vietnamBoundaryLoading = false;
-    console.error('[VietTales] Không tải được ranh giới tỉnh:', error);
-
-    const details = document.getElementById('map-story-details');
-
-    if (details && !details.dataset.boundaryNotice) {
-      details.dataset.boundaryNotice = '1';
-
-      const notice = document.createElement('p');
-      notice.textContent =
-        'Chưa tải được đường biên tỉnh, thành. Bản đồ truyện vẫn có thể sử dụng.';
-      notice.style.color = '#813c33';
-      notice.style.marginTop = '8px';
-
-      details.appendChild(notice);
-    }
-  }
 }
 function removeVietnamBoundaries() {
   if (folkMap && vietnamBoundaryLayer) {
@@ -161,7 +59,6 @@ function renderHistoricalRegionMarkers() {
   if (!folkMap || folkRegionMarkersLayer) return;
 
   folkRegionMarkersLayer = L.layerGroup().addTo(folkMap);
-removeVietnamBoundaries();
   const places = [
     {
       key: 'tra-vinh',
@@ -329,19 +226,18 @@ function initFolkMap() {
     console.error('Không tìm thấy vùng bản đồ hoặc thư viện Leaflet.');
     return;
   }
-
-  if (!folkMap) {
-    folkMap = L.map(el);
-
     L.tileLayer(
-      'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+      'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
       {
-        maxZoom: 19,
-        attribution: '&copy; OpenStreetMap contributors'
+        attribution:
+          '&copy; OpenStreetMap contributors &copy; CARTO',
+        subdomains: 'abcd',
+        maxZoom: 20
       }
     ).addTo(folkMap);
-    
-renderHistoricalRegionMarkers();
+
+    removeVietnamBoundaries();
+    renderHistoricalRegionMarkers();
 
     // Đánh dấu vị trí khái quát của hai quần đảo.
     const islands = [
