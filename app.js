@@ -42,6 +42,164 @@ let folkMap = null;
 let folkMarkers = [];
 let folkIslandMarkers = [];
 
+let vietnamBoundaryLayer = null;
+let folkRegionMarkersLayer = null;
+let vietnamBoundaryLoading = false;
+  
+async function loadVietnamBoundaries() {
+  if (!folkMap || vietnamBoundaryLayer || vietnamBoundaryLoading) {
+    return;
+  }
+
+  vietnamBoundaryLoading = true;
+
+  try {
+    const response = await fetch('./vietnam-provinces.geojson');
+
+    if (!response.ok) {
+      throw new Error('Không tải được file GeoJSON.');
+    }
+
+    const data = await response.json();
+
+    const boundaryPane = folkMap.getPane('provinceBoundaryPane')
+      || folkMap.createPane('provinceBoundaryPane');
+
+    boundaryPane.style.zIndex = 350;
+    boundaryPane.style.pointerEvents = 'auto';
+
+    vietnamBoundaryLayer = L.geoJSON(data, {
+      pane: 'provinceBoundaryPane',
+
+      style: {
+        color: '#8c5c43',
+        weight: 1.3,
+        opacity: 0.9,
+        fillColor: '#e6cda7',
+        fillOpacity: 0.13
+      },
+
+      onEachFeature: function (feature, layer) {
+        const p = feature.properties || {};
+
+        const name =
+          p.name ||
+          p.NAME_1 ||
+          p.NAME ||
+          p.ten_tinh ||
+          p.TenTinh ||
+          p.province ||
+          p.province_name ||
+          p.shapeName ||
+          p.NAME_0 ||
+          'Khu vực hành chính';
+
+        layer.bindTooltip(String(name), {
+          sticky: true,
+          direction: 'auto'
+        });
+
+        layer.on({
+          mouseover: function () {
+            layer.setStyle({
+              weight: 2.5,
+              color: '#813c33',
+              fillOpacity: 0.3
+            });
+          },
+
+          mouseout: function () {
+            vietnamBoundaryLayer.resetStyle(layer);
+          }
+        });
+      }
+    });
+
+    vietnamBoundaryLayer.addTo(folkMap);
+    vietnamBoundaryLoading = false;
+
+  } catch (error) {
+    vietnamBoundaryLoading = false;
+    console.error('[VietTales] Không tải được ranh giới tỉnh:', error);
+
+    const details = document.getElementById('map-story-details');
+
+    if (details && !details.dataset.boundaryNotice) {
+      details.dataset.boundaryNotice = '1';
+
+      const notice = document.createElement('p');
+      notice.textContent =
+        'Chưa tải được đường biên tỉnh, thành. Bản đồ truyện vẫn có thể sử dụng.';
+      notice.style.color = '#813c33';
+      notice.style.marginTop = '8px';
+
+      details.appendChild(notice);
+    }
+  }
+}
+
+function renderHistoricalRegionMarkers() {
+  if (!folkMap || folkRegionMarkersLayer) return;
+
+  folkRegionMarkersLayer = L.layerGroup().addTo(folkMap);
+
+  const places = [
+    {
+      key: 'tra-vinh',
+      name: 'Trà Vinh trước đây',
+      position: [9.93, 106.34],
+      color: '#813c33'
+    },
+    {
+      key: 'ben-tre',
+      name: 'Bến Tre trước đây',
+      position: [10.24, 106.38],
+      color: '#a87531'
+    },
+    {
+      key: 'vinh-long',
+      name: 'Vĩnh Long trước đây',
+      position: [10.25, 105.97],
+      color: '#526047'
+    }
+  ];
+
+  places.forEach(function (place) {
+    const marker = L.circleMarker(place.position, {
+      radius: 8,
+      color: '#fffdf8',
+      weight: 2,
+      fillColor: place.color,
+      fillOpacity: 1
+    });
+
+    marker.bindTooltip(place.name, {
+      permanent: true,
+      direction: 'top',
+      offset: [0, -7]
+    });
+
+    marker.bindPopup(
+      '<strong>' + place.name + '</strong><br>' +
+      'Khu vực văn hóa được ghi nhận theo địa danh lịch sử.'
+    );
+
+    marker.on('click', function () {
+      const selector = document.getElementById('map-region');
+
+      if (selector) {
+        selector.value = place.key;
+        filterFolkMap();
+      }
+
+      folkMap.setView(place.position, 9);
+    });
+
+    folkRegionMarkersLayer.addLayer(marker);
+  });
+}
+
+
 const VIETNAM_BOUNDS = [
   [7.5, 101.5],
   [24, 115]
@@ -163,6 +321,8 @@ function initFolkMap() {
         attribution: '&copy; OpenStreetMap contributors'
       }
     ).addTo(folkMap);
+    loadVietnamBoundaries();
+renderHistoricalRegionMarkers();
 
     // Đánh dấu vị trí khái quát của hai quần đảo.
     const islands = [
