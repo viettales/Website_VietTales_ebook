@@ -1335,7 +1335,31 @@ let ed=e.target.closest('[data-edit]');if(ed){edit(ed.dataset.edit);return}let p
     tab(b.dataset.tab);
   };
 });$('story-form').onsubmit=save;
-  $('map-story-form').onsubmit=addStoryToMap;
+ const mapForm = $('map-story-form');
+
+if (mapForm) {
+  mapForm.onsubmit = async e => {
+    console.log('[VietTales] Form bản đồ đã gửi.');
+    const message = $('map-story-message');
+
+    if (message) {
+      message.textContent = 'Đã nhận yêu cầu, đang kiểm tra...';
+    }
+
+    try {
+      await addStoryToMap(e);
+    } catch (err) {
+      console.error('[VietTales] Lỗi form bản đồ:', err);
+
+      if (message) {
+        message.textContent =
+          'Có lỗi: ' + (err.message || String(err));
+      }
+    }
+  };
+} else {
+  console.error('[VietTales] Không tìm thấy map-story-form.');
+}
   $('story-audio').onchange=e=>{
   audioFile=e.target.files[0]||null;
 };
