@@ -106,39 +106,32 @@ function renderHistoricalRegionMarkers() {
       'Khu vực văn hóa được ghi nhận theo địa danh lịch sử.'
     );
 
-    marker.on('click', function () {
-      const selector = document.getElementById('map-region');
+    
+marker.on('click', function () {
+  const selector = document.getElementById('map-region');
 
-      if (selector) {
-        selector.value = place.key;
-        filterFolkMap();
-      }
-const regions = {
-  'tra-vinh': {
-    center: [9.93, 106.34],
-    zoom: 10
-  },
-  'ben-tre': {
-    center: [10.24, 106.38],
-    zoom: 10
-  },
-  'vinh-long': {
-    center: [10.15, 106.0],
-    zoom: 9
+  if (selector) {
+    selector.value = place.key;
+    filterFolkMap();
   }
-};
 
-const region = regions[place.key];
+  const regions = {
+    'tra-vinh': { center: [9.93, 106.34], zoom: 10 },
+    'ben-tre': { center: [10.24, 106.38], zoom: 10 },
+    'vinh-long': { center: [10.15, 106.0], zoom: 9 }
+  };
 
-if (region) {
-  folkMap.flyTo(region.center, region.zoom, {
-    animate: true,
-    duration: 1.2
-  });
-}
+  const region = regions[place.key];
 
-marker.openPopup();
+  if (region) {
+    folkMap.stop();
+    folkMap.setView(region.center, region.zoom, {
+      animate: false
     });
+  }
+
+  marker.openPopup();
+});
 
     folkRegionMarkersLayer.addLayer(marker);
   });
