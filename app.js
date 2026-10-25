@@ -360,7 +360,7 @@ function renderFolkMapMarkers() {
     if (!visibleCount) {
       details.innerHTML = `
         <p>Chưa có truyện đã xuất bản với vị trí bản đồ hợp lệ
-        trong khu vực này. Bé có thể bổ sung thông tin ở trang quản trị.</p>
+        trong khu vực này.</p>
         ${invalidRealCount
           ? `<p>${invalidRealCount} truyện chọn địa điểm có thật nhưng thiếu tọa độ hợp lệ hoặc tọa độ nằm ngoài phạm vi khu vực tham khảo.</p>`
           : ''}
