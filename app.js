@@ -566,6 +566,15 @@ function edit(id){
   $('story-name').value=s.title;
   $('story-category').value=s.category;
   $('story-summary').value=s.summary||'';
+  
+$('story-region').value=s.region||'';
+$('story-map-mode').value=s.map_mode||'none';
+$('story-place-name').value=s.place_name||'';
+$('story-ward').value=s.ward||'';
+$('story-street').value=s.street||'';
+$('story-latitude').value=s.latitude??'';
+$('story-longitude').value=s.longitude??'';
+
 
   let doc=new DOMParser().parseFromString(
     s.content||'','text/html'
@@ -616,6 +625,17 @@ async function save(e){
     title:$('story-name').value.trim(),
     category:$('story-category').value,
     summary:$('story-summary').value.trim(),
+    
+    region:$('story-region').value,
+    map_mode:$('story-map-mode').value,
+    place_name:$('story-place-name').value.trim(),
+    ward:$('story-ward').value.trim(),
+    street:$('story-street').value.trim(),
+    latitude:$('story-latitude').value.trim()===''
+      ?null:Number($('story-latitude').value),
+    longitude:$('story-longitude').value.trim()===''
+      ?null:Number($('story-longitude').value),
+
     content:storyHtml||text,
     is_featured:$('featured').checked,
     is_published:$('published').checked,
