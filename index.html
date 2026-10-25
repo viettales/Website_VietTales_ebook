@@ -121,7 +121,28 @@ crossorigin=""></script>
       </select>
     </div>
 
-    <div id="folk-map" role="region" aria-label="Bản đồ số truyện dân gian"></div>
+    
+<div class="map-controls">
+  <button type="button" id="map-zoom-in" class="button outline">
+    ＋ Phóng to
+  </button>
+
+  <button type="button" id="map-zoom-out" class="button outline">
+    − Thu nhỏ
+  </button>
+
+  <button type="button" id="map-show-all" class="button outline">
+    ⌖ Xem toàn vùng
+  </button>
+
+  <button type="button" id="map-reset" class="button outline">
+    ↻ Đặt lại
+  </button>
+</div>
+
+<div id="folk-map" role="region"
+     aria-label="Bản đồ số truyện dân gian"></div>
+
     <div id="map-story-details" aria-live="polite">
       <p>Chọn một điểm đánh dấu trên bản đồ để xem thông tin truyện.</p>
     </div>
