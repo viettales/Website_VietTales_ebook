@@ -547,3 +547,34 @@ header .brand > div {
     min-height: 320px;
   }
 }
+/* Fix hien thi ban do VietTales */
+#folk-map {
+  position: relative !important;
+  display: block !important;
+  width: 100% !important;
+  min-height: 400px;
+  height: 400px !important;
+  overflow: hidden !important;
+  background: #e8e1d5;
+  z-index: 1;
+}
+
+#folk-map .leaflet-pane,
+#folk-map .leaflet-tile-container {
+  position: absolute;
+}
+
+#folk-map .leaflet-tile {
+  max-width: none !important;
+  max-height: none !important;
+  width: 256px !important;
+  height: 256px !important;
+}
+
+#folk-map img.leaflet-tile {
+  display: block !important;
+  margin: 0 !important;
+  border: none !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+}
