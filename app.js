@@ -271,10 +271,9 @@ L.tileLayer(
   requestAnimationFrame(() => {
     if (folkMap) {
       folkMap.invalidateSize();
-
-      if (!$('map-region')?.value) {
-        showWholeVietnam();
-      }
+if (!$('map-region')?.value) {
+  showWholeVietnam();
+}
     }
   });
 }
