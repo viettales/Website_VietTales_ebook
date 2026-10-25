@@ -279,6 +279,16 @@ L.tileLayer(
   });
 }
 
+function showWholeVietnam() {
+  if (!folkMap) return;
+
+  folkMap.fitBounds(VIETNAM_BOUNDS, {
+    padding: [20, 20],
+    maxZoom: 6,
+    animate: false
+  });
+}
+
 function renderFolkMapMarkers() {
   if (!folkMap) return;
 
