@@ -243,15 +243,16 @@ function initFolkMap() {
   if (!folkMap) {
     folkMap = L.map(el);
 
-  L.tileLayer(
-  'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png?key=https://basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png?key=cb1_4udb_1_6d5e613e93cae3b825d0c334',
+
+L.tileLayer(
+  'https://basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png?key=https://basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png?key=cb1_4udb_1_6d5e613e93cae3b825d0c334',
   {
     attribution:
       '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; CARTO',
-    subdomains: 'abcd',
     maxZoom: 20
   }
-).addTo(folkMap);.addTo(folkMap);
+).addTo(folkMap);
+
 
     removeVietnamBoundaries();
     renderHistoricalRegionMarkers();
