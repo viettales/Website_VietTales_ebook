@@ -36,6 +36,8 @@ function page(key){
   }
 }
 
+
+
 /* ===== BAN DO SO VIETALES ===== */
 let folkMap = null;
 let folkMarkers = [];
@@ -66,9 +68,8 @@ const folkPlaces = [
 
 function initFolkMap() {
   const el = $('folk-map');
-
   if (!el || !window.L) {
-    console.error('Chưa tìm thấy vùng bản đồ hoặc thư viện Leaflet.');
+    console.error('Không tìm thấy vùng bản đồ hoặc thư viện Leaflet.');
     return;
   }
 
@@ -90,7 +91,6 @@ function initFolkMap() {
 
       marker.on('click', () => {
         const details = $('map-story-details');
-
         if (details) {
           details.innerHTML = `
             <article class="map-detail">
@@ -107,14 +107,39 @@ function initFolkMap() {
     });
 
     const filter = $('map-region');
-
     if (filter) {
       filter.addEventListener('change', filterFolkMap);
     }
+
+    $('map-zoom-in')?.addEventListener('click', () => {
+      folkMap.zoomIn();
+    });
+
+    $('map-zoom-out')?.addEventListener('click', () => {
+      folkMap.zoomOut();
+    });
+
+    $('map-show-all')?.addEventListener('click', () => {
+      if (filter) filter.value = '';
+      filterFolkMap();
+
+      const bounds = L.featureGroup(folkMarkers).getBounds();
+      if (bounds.isValid()) {
+        folkMap.fitBounds(bounds.pad(0.15));
+      }
+    });
+
+    $('map-reset')?.addEventListener('click', () => {
+      if (filter) filter.value = '';
+      filterFolkMap();
+      folkMap.setView([10.05, 106.15], 8);
+    });
   }
 
-  folkMap.invalidateSize();
-  filterFolkMap();
+  requestAnimationFrame(() => {
+    folkMap.invalidateSize();
+    filterFolkMap();
+  });
 }
 
 function filterFolkMap() {
@@ -124,11 +149,15 @@ function filterFolkMap() {
 
   folkMarkers.forEach(marker => {
     if (!region || marker._folkRegion === region) {
-      marker.addTo(folkMap);
+      if (!folkMap.hasLayer(marker)) {
+        marker.addTo(folkMap);
+      }
     } else {
       folkMap.removeLayer(marker);
     }
   });
+
+  const details = $('map-story-details');
 
   if (region) {
     const marker = folkMarkers.find(
@@ -142,13 +171,12 @@ function filterFolkMap() {
     folkMap.setView([10.05, 106.15], 8);
   }
 
-  const details = $('map-story-details');
-
   if (details) {
     details.innerHTML =
       '<p>Chọn một điểm đánh dấu trên bản đồ để xem thông tin địa điểm.</p>';
   }
 }
+
 
 function isFavorite(id){
   return favorites.includes(String(id));
