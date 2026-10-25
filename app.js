@@ -399,7 +399,7 @@ if (region) {
     folkMap.setView(info.center, 9);
   }
 } else {
-  showWholeVietnam();
+  folkMap.setView([16.0, 106.0], 6);
 }
 }
 function filterFolkMap() {
