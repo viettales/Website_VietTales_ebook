@@ -433,16 +433,22 @@ marker.on('click', function () {
 if (region) {
   const info = folkRegions[region];
 
-  if (folkMarkers.length) {
+  if (info && info.bounds) {
+    const [minLat, maxLat, minLng, maxLng] = info.bounds;
+
     folkMap.fitBounds(
-      L.featureGroup(folkMarkers).getBounds().pad(0.15),
-      { maxZoom: 11 }
+      [[minLat, minLng], [maxLat, maxLng]],
+      {
+        padding: [25, 25],
+        maxZoom: 10,
+        animate: false
+      }
     );
   } else if (info) {
-    folkMap.setView(info.center, 9);
+    folkMap.setView(info.center, 9, { animate: false });
   }
 } else {
-  folkMap.setView([16.0, 106.0], 6);
+  folkMap.setView([16.0, 106.0], 6, { animate: false });
 }
 }
 function filterFolkMap() {
