@@ -78,17 +78,20 @@ function renderHistoricalRegionMarkers() {
     {
       key: 'tra-vinh',
       name: 'Trà Vinh trước đây',
-      position: [9.93, 106.34]
+      position: [9.93, 106.34],
+      bounds: [[9.45, 10.35], [105.95, 106.75]]
     },
     {
       key: 'ben-tre',
       name: 'Bến Tre trước đây',
-      position: [10.24, 106.38]
+      position: [10.24, 106.38],
+      bounds: [[9.75, 10.45], [105.95, 106.85]]
     },
     {
       key: 'vinh-long',
       name: 'Vĩnh Long trước đây',
-      position: [10.25, 105.97]
+      position: [10.25, 105.97],
+      bounds: [[9.75, 10.55], [105.55, 106.35]]
     }
   ];
 
@@ -106,40 +109,22 @@ function renderHistoricalRegionMarkers() {
       'Khu vực văn hóa được ghi nhận theo địa danh lịch sử.'
     );
 
-    
-marker.on('click', function () {
-  const selector = document.getElementById('map-region');
+    marker.on('click', function () {
+      const selector = $('map-region');
 
-  if (selector) {
-    selector.value = place.key;
-    filterFolkMap();
-  }
+      if (selector) selector.value = place.key;
 
- 
-const region = folkRegions[place.key];
+      folkMap.stop();
 
-folkMap.stop();
+      folkMap.fitBounds(place.bounds, {
+        padding: [25, 25],
+        maxZoom: 10,
+        animate: false
+      });
 
-if (region && region.bounds) {
-  const [minLat, maxLat, minLng, maxLng] = region.bounds;
-
-  folkMap.fitBounds(
-    [
-      [minLat, minLng],
-      [maxLat, maxLng]
-    ],
-    {
-      padding: [30, 30],
-      maxZoom: 11,
-      animate: true,
-      duration: 1
-    }
-  );
-}
-
-marker.openPopup();
-
-});
+      renderFolkMapMarkers();
+      marker.openPopup();
+    });
 
     folkRegionMarkersLayer.addLayer(marker);
   });
@@ -366,41 +351,6 @@ function renderFolkMapMarkers() {
       </div>
     `);
 
-   
-marker.on('click', function () {
-  const selector = document.getElementById('map-region');
-
-  if (selector) {
-    selector.value = place.key;
-  }
-
-  folkMap.stop();
-
-  const region = folkRegions[place.key];
-
-  if (region && region.bounds) {
-    const [minLat, maxLat, minLng, maxLng] = region.bounds;
-
-    folkMap.fitBounds(
-      L.latLngBounds(
-        [minLat, minLng],
-        [maxLat, maxLng]
-      ),
-      {
-        padding: [20, 20],
-        maxZoom: 10,
-        animate: false
-      }
-    );
-  } else {
-    folkMap.setView(place.position, 9, {
-      animate: false
-    });
-  }
-
-  filterFolkMap();
-  marker.openPopup();
-});
 
 
     marker._folkRegion = story.region;
