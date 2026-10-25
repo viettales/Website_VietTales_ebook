@@ -366,24 +366,42 @@ function renderFolkMapMarkers() {
       </div>
     `);
 
-    marker.on('click', () => {
-      if (!details) return;
+   
+marker.on('click', function () {
+  const selector = document.getElementById('map-region');
 
-      details.innerHTML = `
-        <article class="map-detail">
-          <h3>${esc(story.title)}</h3>
-          <p><b>Khu vực:</b> ${esc(regionInfo.name)}</p>
-          <p><b>Địa điểm:</b> ${esc(placeName)}</p>
-          ${address ? `<p><b>Địa chỉ:</b> ${esc(address)}</p>` : ''}
-          <p>${esc(label)}</p>
-          <button type="button"
-            class="button primary"
-            data-story="${esc(story.id)}">
-            Đọc truyện này →
-          </button>
-        </article>
-      `;
+  if (selector) {
+    selector.value = place.key;
+  }
+
+  folkMap.stop();
+
+  const region = folkRegions[place.key];
+
+  if (region && region.bounds) {
+    const [minLat, maxLat, minLng, maxLng] = region.bounds;
+
+    folkMap.fitBounds(
+      L.latLngBounds(
+        [minLat, minLng],
+        [maxLat, maxLng]
+      ),
+      {
+        padding: [20, 20],
+        maxZoom: 10,
+        animate: false
+      }
+    );
+  } else {
+    folkMap.setView(place.position, 9, {
+      animate: false
     });
+  }
+
+  filterFolkMap();
+  marker.openPopup();
+});
+
 
     marker._folkRegion = story.region;
     marker.addTo(folkMap);
