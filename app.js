@@ -333,7 +333,7 @@ function initFolkMap() {
         attribution: '&copy; OpenStreetMap contributors'
       }
     ).addTo(folkMap);
-     loadVietnamBoundaries();
+    
 renderHistoricalRegionMarkers();
 
     // Đánh dấu vị trí khái quát của hai quần đảo.
