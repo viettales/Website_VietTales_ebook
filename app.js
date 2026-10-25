@@ -55,7 +55,23 @@ function page(key){
 let folkMap = null;
 let folkMarkers = [];
 let folkIslandMarkers = [];
-
+const folkRegions = {
+  'tra-vinh': {
+    name: 'Trà Vinh',
+    center: [9.93, 106.34],
+    bounds: [9.45, 10.35, 105.95, 106.75]
+  },
+  'ben-tre': {
+    name: 'Bến Tre',
+    center: [10.24, 106.38],
+    bounds: [9.75, 10.45, 105.95, 106.85]
+  },
+  'vinh-long': {
+    name: 'Vĩnh Long',
+    center: [10.25, 105.97],
+    bounds: [9.75, 10.55, 105.55, 106.35]
+  }
+};
 let vietnamBoundaryLayer = null;
 let folkRegionMarkersLayer = null;
 let vietnamBoundaryLoading = false;
