@@ -649,8 +649,19 @@ function updateProfileUI(){
 
 async function submitAuth(e){e.preventDefault();if(!db){$('auth-message').textContent='Chưa cấu hình Supabase trong config.js.';return}let email=$('auth-email').value.trim(),password=$('auth-password').value;try{let r=mode==='login'?await db.auth.signInWithPassword({email,password}):await db.auth.signUp({email,password});if(r.error)throw r.error;if(mode==='signup'){$('auth-message').textContent='Đã gửi yêu cầu đăng ký. Kiểm tra email nếu cần xác nhận.';return}await refresh();modal('auth-modal',false);if(admin)await openAdmin();else toast('Đăng nhập thành công.')}catch(e){$('auth-message').textContent=e.message||'Không thể đăng nhập.'}}
 async function openAdmin(){await refresh();if(!user){modal('auth-modal',true);$('auth-message').textContent='Đăng nhập tài khoản quản trị trước nhé.';return}if(!admin){toast('Tài khoản này chưa được cấp quyền quản trị.',true);return}$('admin-user').textContent=user.email;modal('admin-modal',true);await adminList()}
-function tab(name){document.querySelectorAll('.admin-tab').forEach(b=>b.classList.toggle('selected',b.dataset.tab===name));$('admin-list').hidden=name!=='list';$('admin-editor').hidden=name!=='editor'}
+function tab(name){
+  document.querySelectorAll('.admin-tab').forEach(b=>{
+    b.classList.toggle('selected',b.dataset.tab===name);
+  });
 
+  $('admin-list').hidden=name!=='list';
+  $('admin-editor').hidden=name!=='editor';
+  $('admin-map').hidden=name!=='map';
+
+  if(name==='map'){
+    renderAdminMapStories();
+  }
+}
 function updateAdminStats(data){
   const total=data.length;
   const published=data.filter(s=>s.is_published).length;
@@ -712,7 +723,142 @@ async function adminList(){
     `).join('')
     :empty();
 }
+function renderAdminMapStories(){
+  const select=$('map-story-select');
+  if(!select)return;
 
+  const oldValue=select.value;
+
+  const published=stories.filter(s=>s.is_published);
+
+  select.innerHTML=
+    '<option value="">-- Chọn truyện --</option>'+
+    published.map(s=>
+      `<option value="${esc(s.id)}">${esc(s.title)}</option>`
+    ).join('');
+
+  if(published.some(s=>String(s.id)===oldValue)){
+    select.value=oldValue;
+  }
+}
+  async function addStoryToMap(e){
+  e.preventDefault();
+
+  const message=$('map-story-message');
+  const id=$('map-story-select').value;
+  const region=$('map-story-region').value;
+  const place=$('map-story-place').value.trim();
+  const ward=$('map-story-ward').value.trim();
+  const address=$('map-story-address').value.trim();
+
+  if(!db||!admin||!user){
+    message.textContent='Vui lòng đăng nhập tài khoản quản trị.';
+    return;
+  }
+
+  const story=stories.find(s=>String(s.id)===String(id));
+
+  if(!story||!story.is_published){
+    message.textContent='Vui lòng chọn một truyện đã xuất bản.';
+    return;
+  }
+
+  const regionInfo=folkRegions[region];
+
+  if(!regionInfo||!place){
+    message.textContent='Vui lòng chọn khu vực và nhập tên địa điểm.';
+    return;
+  }
+
+  const button=$('map-story-form').querySelector(
+    'button[type="submit"]'
+  );
+
+  button.disabled=true;
+  message.textContent='Đang xác minh địa điểm...';
+
+  try{
+    const query=[
+      place,
+      ward,
+      address,
+      regionInfo.name,
+      'Vietnam'
+    ].filter(Boolean).join(', ');
+
+    const params=new URLSearchParams({
+      format:'jsonv2',
+      limit:'1',
+      countrycodes:'vn',
+      q:query
+    });
+
+    const response=await fetch(
+      'https://nominatim.openstreetmap.org/search?'+params.toString(),
+      {headers:{'Accept':'application/json'}}
+    );
+
+    if(!response.ok){
+      throw Error('Dịch vụ tìm địa điểm đang gặp lỗi. Bé thử lại sau nhé.');
+    }
+
+    const results=await response.json();
+
+    if(!results.length){
+      throw Error('Không tìm thấy địa điểm. Bé thử bổ sung địa chỉ cụ thể hơn nhé.');
+    }
+
+    const lat=Number(results[0].lat);
+    const lng=Number(results[0].lon);
+
+    const [minLat,maxLat,minLng,maxLng]=regionInfo.bounds;
+
+    if(
+      !Number.isFinite(lat)||!Number.isFinite(lng)||
+      lat<minLat||lat>maxLat||
+      lng<minLng||lng>maxLng
+    ){
+      throw Error(
+        'Kết quả tìm được nằm ngoài phạm vi khu vực đã chọn. Bé kiểm tra lại tên địa điểm hoặc khu vực nhé.'
+      );
+    }
+
+    message.textContent='Đã xác minh vị trí, đang lưu...';
+
+    const {error}=await db
+      .from('stories')
+      .update({
+        region:region,
+        map_mode:'real',
+        place_name:place,
+        ward:ward||null,
+        street:address||null,
+        latitude:lat,
+        longitude:lng
+      })
+      .eq('id',story.id)
+      .eq('is_published',true);
+
+    if(error)throw error;
+
+    $('map-story-form').reset();
+    await adminList();
+    renderAdminMapStories();
+
+    message.textContent='Đã thêm địa điểm vào bản đồ thành công!';
+    toast('Đã cập nhật địa điểm truyện.');
+
+    if(folkMap){
+      renderFolkMapMarkers();
+    }
+
+  }catch(err){
+    console.error('Lỗi thêm truyện vào bản đồ:',err);
+    message.textContent=err.message||'Không thể thêm địa điểm vào bản đồ.';
+  }finally{
+    button.disabled=false;
+  }
+}
 function reset(){
   $('story-form').reset();
   $('story-id').value='';
@@ -1180,7 +1326,16 @@ modal('reader-modal',true);
 }
 return;
 }
-let ed=e.target.closest('[data-edit]');if(ed){edit(ed.dataset.edit);return}let pub=e.target.closest('[data-publish]');if(pub){let s=stories.find(x=>x.id===pub.dataset.publish);let r=await db.from('stories').update({is_published:!s.is_published}).eq('id',s.id);if(r.error)toast(r.error.message,true);else await adminList();return}let del=e.target.closest('[data-delete]');if(del){let s=stories.find(x=>x.id===del.dataset.delete);if(s&&confirm(`Xóa truyện “${s.title}”?`)){let r=await db.from('stories').delete().eq('id',s.id);if(r.error)toast(r.error.message,true);else await adminList()} }});$('new-story').onclick=()=>{reset();tab('editor')};$('cancel-edit').onclick=()=>{reset();tab('list')};document.querySelectorAll('.admin-tab').forEach(b=>b.onclick=()=>{if(b.dataset.tab==='editor'&&!$('story-id').value)reset();tab(b.dataset.tab)});$('story-form').onsubmit=save;
+let ed=e.target.closest('[data-edit]');if(ed){edit(ed.dataset.edit);return}let pub=e.target.closest('[data-publish]');if(pub){let s=stories.find(x=>x.id===pub.dataset.publish);let r=await db.from('stories').update({is_published:!s.is_published}).eq('id',s.id);if(r.error)toast(r.error.message,true);else await adminList();return}let del=e.target.closest('[data-delete]');if(del){let s=stories.find(x=>x.id===del.dataset.delete);if(s&&confirm(`Xóa truyện “${s.title}”?`)){let r=await db.from('stories').delete().eq('id',s.id);if(r.error)toast(r.error.message,true);else await adminList()} }});$('new-story').onclick=()=>{reset();tab('editor')};$('cancel-edit').onclick=()=>{reset();tab('list')};document.querySelectorAll('.admin-tab').forEach(b=>{
+  b.onclick=()=>{
+    if(b.dataset.tab==='editor'&&!$('story-id').value){
+      reset();
+    }
+
+    tab(b.dataset.tab);
+  };
+});$('story-form').onsubmit=save;
+  $('map-story-form').onsubmit=addStoryToMap;
   $('story-audio').onchange=e=>{
   audioFile=e.target.files[0]||null;
 };
