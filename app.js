@@ -46,7 +46,6 @@ let vietnamBoundaryLayer = null;
 let folkRegionMarkersLayer = null;
 let vietnamBoundaryLoading = false;
   
-}
 function removeVietnamBoundaries() {
   if (folkMap && vietnamBoundaryLayer) {
     folkMap.removeLayer(vietnamBoundaryLayer);
@@ -219,6 +218,7 @@ function getStoryMapPoint(story) {
   return null;
 }
 
+
 function initFolkMap() {
   const el = $('folk-map');
 
@@ -226,6 +226,10 @@ function initFolkMap() {
     console.error('Không tìm thấy vùng bản đồ hoặc thư viện Leaflet.');
     return;
   }
+
+  if (!folkMap) {
+    folkMap = L.map(el);
+
     L.tileLayer(
       'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
       {
@@ -239,7 +243,6 @@ function initFolkMap() {
     removeVietnamBoundaries();
     renderHistoricalRegionMarkers();
 
-    // Đánh dấu vị trí khái quát của hai quần đảo.
     const islands = [
       {
         name: 'Quần đảo Hoàng Sa',
@@ -259,7 +262,7 @@ function initFolkMap() {
         fillColor: '#d9a441',
         fillOpacity: 1
       }).addTo(folkMap);
-  
+
       marker.bindTooltip(island.name, {
         permanent: true,
         direction: 'right',
@@ -302,13 +305,13 @@ function initFolkMap() {
   requestAnimationFrame(() => {
     if (folkMap) {
       folkMap.invalidateSize();
+
       if (!$('map-region')?.value) {
         showWholeVietnam();
       }
     }
   });
 }
-
 
 function renderFolkMapMarkers() {
   if (!folkMap) return;
@@ -937,7 +940,7 @@ function renderAdminMapStories(){
 function reset(){
   $('story-form').reset();
   $('story-id').value='';
-   $('story-video').value='';
+ if ($('story-video')) $('story-video').value = '';
   imagePath=null;
   audioPath=null;
   audioFile=null;
@@ -1435,12 +1438,19 @@ if (mapForm) {
 } else {
   console.error('[VietTales] Không tìm thấy map-story-form.');
 }
-  $('story-audio').onchange=e=>{
-  audioFile=e.target.files[0]||null;
-};
-    $('story-video').onchange=e=>{
-    videoFile=e.target.files[0]||null;
+const audioInput = $('story-audio');
+if (audioInput) {
+  audioInput.onchange = e => {
+    audioFile = e.target.files[0] || null;
   };
+}
+
+const videoInput = $('story-video');
+if (videoInput) {
+  videoInput.onchange = e => {
+    videoFile = e.target.files[0] || null;
+  };
+}
 $('avatar-upload').onchange=async e=>{
     const file=e.target.files[0];
 
