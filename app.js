@@ -149,12 +149,19 @@ const response = await fetch(url.toString());
     }
   }
 }
+function removeVietnamBoundaries() {
+  if (folkMap && vietnamBoundaryLayer) {
+    folkMap.removeLayer(vietnamBoundaryLayer);
+  }
 
+  vietnamBoundaryLayer = null;
+  vietnamBoundaryLoading = false;
+}
 function renderHistoricalRegionMarkers() {
   if (!folkMap || folkRegionMarkersLayer) return;
 
   folkRegionMarkersLayer = L.layerGroup().addTo(folkMap);
-
+removeVietnamBoundaries();
   const places = [
     {
       key: 'tra-vinh',
