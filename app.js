@@ -19,6 +19,7 @@ const routes={
 };
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function toast(s,error=false){let t=$('toast');t.textContent=s;t.className='show'+(error?' error':'');setTimeout(()=>t.className='',3500)}
+
 function page(key){
   document.querySelectorAll('.page').forEach(
     p=>p.classList.toggle('active',p.dataset.section===key)
@@ -33,8 +34,21 @@ function page(key){
 
   if(key==='ban-do-so'){
     initFolkMap();
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        if(folkMap){
+          folkMap.invalidateSize({pan:false});
+
+          if(!$('map-region')?.value){
+            showWholeVietnam();
+          }
+        }
+      });
+    });
   }
 }
+
 
 
 /* ===== BAN DO SO VIETALES ===== */
