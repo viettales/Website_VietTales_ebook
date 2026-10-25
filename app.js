@@ -41,7 +41,7 @@ function page(key){
           folkMap.invalidateSize({pan:false});
 
           if(!$('map-region')?.value){
-            showWholeVietnam();
+            showWholevietnam();
           }
         }
       });
