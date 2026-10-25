@@ -798,6 +798,10 @@ function renderAdminMapStories(){
     select.value=oldValue;
   }
 }
+  console.log(
+  '[VietTales] folkRegions khả dụng:',
+  typeof folkRegions
+);
   async function addStoryToMap(e){
   e.preventDefault();
 
