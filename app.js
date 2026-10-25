@@ -600,7 +600,7 @@ function updateProfileUI(){
     if(placeholder)placeholder.hidden=false;
   }
 
-  $('stat-favorite').textContent=getFavorites().length;
+ $('stat-favorite').textContent=favorites.length;
 }
 
 
