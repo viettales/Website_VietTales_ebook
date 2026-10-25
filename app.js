@@ -40,6 +40,22 @@ function page(key){
 /* ===== BAN DO SO VIETALES ===== */
 let folkMap = null;
 let folkMarkers = [];
+let folkIslandMarkers = [];
+
+const VIETNAM_BOUNDS = [
+  [7.5, 101.5],
+  [24, 115]
+];
+
+function showWholeVietnam() {
+  if (!folkMap) return;
+
+  folkMap.fitBounds(VIETNAM_BOUNDS, {
+    padding: [20, 20],
+    maxZoom: 6,
+    animate: false
+  });
+}
 
 const folkRegions = {
   'tra-vinh': {
@@ -138,7 +154,7 @@ function initFolkMap() {
   }
 
   if (!folkMap) {
-    folkMap = L.map(el).setView([10.05, 106.15], 8);
+    folkMap = L.map(el);
 
     L.tileLayer(
       'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
@@ -147,6 +163,37 @@ function initFolkMap() {
         attribution: '&copy; OpenStreetMap contributors'
       }
     ).addTo(folkMap);
+
+    // Đánh dấu vị trí khái quát của hai quần đảo.
+    const islands = [
+      {
+        name: 'Quần đảo Hoàng Sa',
+        position: [16.5, 112.0]
+      },
+      {
+        name: 'Quần đảo Trường Sa',
+        position: [8.6, 111.9]
+      }
+    ];
+
+    islands.forEach(island => {
+      const marker = L.circleMarker(island.position, {
+        radius: 6,
+        color: '#8b3f27',
+        weight: 2,
+        fillColor: '#d9a441',
+        fillOpacity: 1
+      }).addTo(folkMap);
+
+      marker.bindTooltip(island.name, {
+        permanent: true,
+        direction: 'right',
+        offset: [8, 0],
+        className: 'folk-island-label'
+      });
+
+      folkIslandMarkers.push(marker);
+    });
 
     const filter = $('map-region');
 
@@ -165,29 +212,28 @@ function initFolkMap() {
     $('map-show-all')?.addEventListener('click', () => {
       if (filter) filter.value = '';
       renderFolkMapMarkers();
-
-      const bounds = L.featureGroup(folkMarkers).getBounds();
-
-      if (bounds.isValid()) {
-        folkMap.fitBounds(bounds.pad(0.15));
-      } else {
-        folkMap.setView([10.05, 106.15], 8);
-      }
+      showWholeVietnam();
     });
 
     $('map-reset')?.addEventListener('click', () => {
       if (filter) filter.value = '';
       renderFolkMapMarkers();
-      folkMap.setView([10.05, 106.15], 8);
+      showWholeVietnam();
     });
   }
 
   renderFolkMapMarkers();
 
   requestAnimationFrame(() => {
-    if (folkMap) folkMap.invalidateSize();
+    if (folkMap) {
+      folkMap.invalidateSize();
+      if (!$('map-region')?.value) {
+        showWholeVietnam();
+      }
+    }
   });
 }
+
 
 function renderFolkMapMarkers() {
   if (!folkMap) return;
@@ -286,25 +332,22 @@ function renderFolkMapMarkers() {
     }
   }
 
-  if (region) {
-    const info = folkRegions[region];
 
-    if (folkMarkers.length) {
-      folkMap.fitBounds(
-        L.featureGroup(folkMarkers).getBounds().pad(0.15)
-      );
-    } else if (info) {
-      folkMap.setView(info.center, 9);
-    }
-  } else if (folkMarkers.length) {
+if (region) {
+  const info = folkRegions[region];
+
+  if (folkMarkers.length) {
     folkMap.fitBounds(
-      L.featureGroup(folkMarkers).getBounds().pad(0.15)
+      L.featureGroup(folkMarkers).getBounds().pad(0.15),
+      { maxZoom: 11 }
     );
-  } else {
-    folkMap.setView([10.05, 106.15], 8);
+  } else if (info) {
+    folkMap.setView(info.center, 9);
   }
+} else {
+  showWholeVietnam();
 }
-
+}
 function filterFolkMap() {
   renderFolkMapMarkers();
 }
