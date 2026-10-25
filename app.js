@@ -115,22 +115,30 @@ marker.on('click', function () {
     filterFolkMap();
   }
 
-  const regions = {
-    'tra-vinh': { center: [9.93, 106.34], zoom: 10 },
-    'ben-tre': { center: [10.24, 106.38], zoom: 10 },
-    'vinh-long': { center: [10.15, 106.0], zoom: 9 }
-  };
+ 
+const region = folkRegions[place.key];
 
-  const region = regions[place.key];
+folkMap.stop();
 
-  if (region) {
-    folkMap.stop();
-    folkMap.setView(region.center, region.zoom, {
-      animate: false
-    });
-  }
+if (region && region.bounds) {
+  const [minLat, maxLat, minLng, maxLng] = region.bounds;
 
-  marker.openPopup();
+  folkMap.fitBounds(
+    [
+      [minLat, minLng],
+      [maxLat, maxLng]
+    ],
+    {
+      padding: [30, 30],
+      maxZoom: 11,
+      animate: true,
+      duration: 1
+    }
+  );
+}
+
+marker.openPopup();
+
 });
 
     folkRegionMarkersLayer.addLayer(marker);
