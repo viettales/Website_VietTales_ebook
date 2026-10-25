@@ -19,10 +19,135 @@ const routes={
 };
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function toast(s,error=false){let t=$('toast');t.textContent=s;t.className='show'+(error?' error':'');setTimeout(()=>t.className='',3500)}
-function page(key){document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.dataset.section===key));document.querySelectorAll('nav a').forEach(a=>a.classList.toggle('active',a.dataset.page===key));$('nav').classList.remove('open');scrollTo({top:0,behavior:'smooth'})}
-function empty(){return '<div class="empty"><b>Kho truyện đang được xây dựng</b>Các câu chuyện sẽ xuất hiện tại đây sau khi quản trị viên thêm và xuất bản.</div>'}
-function getFavorites(){
-  return favorites;
+function page(key){
+  document.querySelectorAll('.page').forEach(
+    p=>p.classList.toggle('active',p.dataset.section===key)
+  );
+
+  document.querySelectorAll('nav a').forEach(
+    a=>a.classList.toggle('active',a.dataset.page===key)
+  );
+
+  $('nav').classList.remove('open');
+  scrollTo({top:0,behavior:'smooth'});
+
+  if(key==='ban-do-so'){
+    initFolkMap();
+  }
+}
+
+/* ===== BAN DO SO VIETALES ===== */
+let folkMap = null;
+let folkMarkers = [];
+
+const folkPlaces = [
+  {
+    region: 'tra-vinh',
+    name: 'Thành phố Trà Vinh trước đây',
+    lat: 9.9347,
+    lng: 106.3453,
+    note: 'Địa điểm tham khảo. Cần bổ sung truyện dân gian và nguồn tư liệu đã kiểm chứng.'
+  },
+  {
+    region: 'ben-tre',
+    name: 'Thành phố Bến Tre trước đây',
+    lat: 10.2433,
+    lng: 106.3756,
+    note: 'Địa điểm tham khảo. Cần bổ sung truyện dân gian và nguồn tư liệu đã kiểm chứng.'
+  },
+  {
+    region: 'vinh-long',
+    name: 'Thành phố Vĩnh Long',
+    lat: 10.2397,
+    lng: 105.9571,
+    note: 'Địa điểm tham khảo. Cần bổ sung truyện dân gian và nguồn tư liệu đã kiểm chứng.'
+  }
+];
+
+function initFolkMap() {
+  const el = $('folk-map');
+
+  if (!el || !window.L) {
+    console.error('Chưa tìm thấy vùng bản đồ hoặc thư viện Leaflet.');
+    return;
+  }
+
+  if (!folkMap) {
+    folkMap = L.map(el).setView([10.05, 106.15], 8);
+
+    L.tileLayer(
+      'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+      {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap contributors'
+      }
+    ).addTo(folkMap);
+
+    folkPlaces.forEach(place => {
+      const marker = L.marker([place.lat, place.lng]);
+
+      marker.bindPopup(`<strong>${esc(place.name)}</strong>`);
+
+      marker.on('click', () => {
+        const details = $('map-story-details');
+
+        if (details) {
+          details.innerHTML = `
+            <article class="map-detail">
+              <h3>${esc(place.name)}</h3>
+              <p>${esc(place.note)}</p>
+            </article>
+          `;
+        }
+      });
+
+      marker._folkRegion = place.region;
+      marker.addTo(folkMap);
+      folkMarkers.push(marker);
+    });
+
+    const filter = $('map-region');
+
+    if (filter) {
+      filter.addEventListener('change', filterFolkMap);
+    }
+  }
+
+  folkMap.invalidateSize();
+  filterFolkMap();
+}
+
+function filterFolkMap() {
+  if (!folkMap) return;
+
+  const region = $('map-region')?.value || '';
+
+  folkMarkers.forEach(marker => {
+    if (!region || marker._folkRegion === region) {
+      marker.addTo(folkMap);
+    } else {
+      folkMap.removeLayer(marker);
+    }
+  });
+
+  if (region) {
+    const marker = folkMarkers.find(
+      m => m._folkRegion === region
+    );
+
+    if (marker) {
+      folkMap.setView(marker.getLatLng(), 10);
+    }
+  } else {
+    folkMap.setView([10.05, 106.15], 8);
+  }
+
+  const details = $('map-story-details');
+
+  if (details) {
+    details.innerHTML =
+      '<p>Chọn một điểm đánh dấu trên bản đồ để xem thông tin địa điểm.</p>';
+  }
 }
 
 function isFavorite(id){
