@@ -261,7 +261,20 @@ crossorigin=""></script>
   </audio>
 </div>
 </article></div>
-<div class="backdrop" id="admin-modal" hidden><div class="modal admin"><button class="x" data-close="admin-modal">×</button><div class="admin-head"><div><span class="eyebrow">KHÔNG GIAN QUẢN LÝ</span><h2>Quản trị nội dung</h2><small id="admin-user"></small></div><button id="logout" class="button outline">Đăng xuất</button></div><div class="tabs"><button class="admin-tab selected" data-tab="list">Quản lý truyện</button><button class="admin-tab" data-tab="editor">Thêm truyện</button></div><section id="admin-list"><div class="list-head"><h3>Danh sách truyện</h3><button id="new-story" class="button primary">+ Thêm truyện</button></div><div id="admin-stories"></div></section><section id="admin-editor" hidden><h3 id="editor-title">Thêm truyện mới</h3><form id="story-form"><input type="hidden" id="story-id"><label>Tên truyện *</label><input id="story-name" required maxlength="200"><label>Thể loại *</label><select id="story-category"><option>Truyền Thuyết</option><option>Truyện Cười</option><option>Truyện Cổ Tích</option><option>Truyện Giải Thích Địa Phương</option><option>Truyện Ngụ Ngôn</option><option>Giai thoại</option><option>Truyện danh nhân</option></select><label>Mô tả ngắn</label><textarea id="story-summary" rows="2"></textarea>
+<div class="backdrop" id="admin-modal" hidden><div class="modal admin"><button class="x" data-close="admin-modal">×</button><div class="admin-head"><div><span class="eyebrow">KHÔNG GIAN QUẢN LÝ</span><h2>Quản trị nội dung</h2><small id="admin-user"></small></div><button id="logout" class="button outline">Đăng xuất</button></div>
+  
+<div class="tabs">
+  <button class="admin-tab selected" data-tab="list">
+    Quản lý truyện
+  </button>
+  <button class="admin-tab" data-tab="editor">
+    Thêm truyện
+  </button>
+  <button class="admin-tab" data-tab="map">
+    Quản lý bản đồ
+  </button>
+</div>
+<section id="admin-list"><div class="list-head"><h3>Danh sách truyện</h3><button id="new-story" class="button primary">+ Thêm truyện</button></div><div id="admin-stories"></div></section><section id="admin-editor" hidden><h3 id="editor-title">Thêm truyện mới</h3><form id="story-form"><input type="hidden" id="story-id"><label>Tên truyện *</label><input id="story-name" required maxlength="200"><label>Thể loại *</label><select id="story-category"><option>Truyền Thuyết</option><option>Truyện Cười</option><option>Truyện Cổ Tích</option><option>Truyện Giải Thích Địa Phương</option><option>Truyện Ngụ Ngôn</option><option>Giai thoại</option><option>Truyện danh nhân</option></select><label>Mô tả ngắn</label><textarea id="story-summary" rows="2"></textarea>
   
 <label>Khu vực truyện *</label>
 <select id="story-region" required>
@@ -311,4 +324,56 @@ crossorigin=""></script>
 <input type="file" id="story-video" accept="video/mp4,.mp4">
 <small>Chọn video minh họa để độc giả xem trực tiếp khi đọc truyện.</small>
 
-  <label class="check"><input id="featured" type="checkbox"> Hiển thị trong mục truyện nổi bật</label><label class="check"><input id="published" type="checkbox"> Xuất bản ngay sau khi lưu</label><div class="actions"><button type="button" id="cancel-edit" class="button outline">Hủy</button><button class="button primary" id="save-story">Lưu truyện</button></div><p id="story-message" class="message"></p></form></section></div></div><div id="toast" role="status"></div></body></html>
+  <label class="check"><input id="featured" type="checkbox"> Hiển thị trong mục truyện nổi bật</label><label class="check"><input id="published" type="checkbox"> Xuất bản ngay sau khi lưu</label><div class="actions"><button type="button" id="cancel-edit" class="button outline">Hủy</button><button class="button primary" id="save-story">Lưu truyện</button></div><p id="story-message" class="message"></p></form></section>
+
+<section id="admin-map" hidden>
+  <h3>Thêm truyện vào bản đồ</h3>
+  <p>
+    Chọn truyện đã xuất bản, nhập tên địa điểm và địa chỉ
+    nếu có để đưa câu chuyện lên bản đồ số.
+  </p>
+
+  <form id="map-story-form">
+    <label for="map-story-select">Chọn truyện đã xuất bản *</label>
+    <select id="map-story-select" required>
+      <option value="">-- Chọn truyện --</option>
+    </select>
+
+    <label for="map-story-region">Khu vực *</label>
+    <select id="map-story-region" required>
+      <option value="">-- Chọn khu vực --</option>
+      <option value="tra-vinh">Trà Vinh trước đây</option>
+      <option value="ben-tre">Bến Tre trước đây</option>
+      <option value="vinh-long">Vĩnh Long trước đây</option>
+    </select>
+
+    <label for="map-story-place">Tên địa điểm *</label>
+    <input
+      id="map-story-place"
+      type="text"
+      placeholder="Ví dụ: Ao Bà Om"
+      required
+    >
+
+    <label for="map-story-ward">Xã/phường (nếu có)</label>
+    <input
+      id="map-story-ward"
+      type="text"
+      placeholder="Tên xã hoặc phường"
+    >
+
+    <label for="map-story-address">Địa chỉ (nếu có)</label>
+    <input
+      id="map-story-address"
+      type="text"
+      placeholder="Đường, xã/phường, tỉnh..."
+    >
+
+    <button type="submit" class="button primary">
+      Thêm vào bản đồ
+    </button>
+
+    <p id="map-story-message" class="message"></p>
+  </form>
+</section>
+</div></div><div id="toast" role="status"></div></body></html>
