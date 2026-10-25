@@ -113,13 +113,31 @@ function renderHistoricalRegionMarkers() {
         selector.value = place.key;
         filterFolkMap();
       }
+const regions = {
+  'tra-vinh': {
+    center: [9.93, 106.34],
+    zoom: 10
+  },
+  'ben-tre': {
+    center: [10.24, 106.38],
+    zoom: 10
+  },
+  'vinh-long': {
+    center: [10.15, 106.0],
+    zoom: 9
+  }
+};
 
-      folkMap.flyTo(place.position, 11, {
-        animate: true,
-        duration: 1.2
-      });
+const region = regions[place.key];
 
-      marker.openPopup();
+if (region) {
+  folkMap.flyTo(region.center, region.zoom, {
+    animate: true,
+    duration: 1.2
+  });
+}
+
+marker.openPopup();
     });
 
     folkRegionMarkersLayer.addLayer(marker);
