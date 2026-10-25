@@ -67,39 +67,32 @@ function removeVietnamBoundaries() {
   vietnamBoundaryLayer = null;
   vietnamBoundaryLoading = false;
 }
+
 function renderHistoricalRegionMarkers() {
   if (!folkMap || folkRegionMarkersLayer) return;
 
   folkRegionMarkersLayer = L.layerGroup().addTo(folkMap);
+
   const places = [
     {
       key: 'tra-vinh',
       name: 'Trà Vinh trước đây',
-      position: [9.93, 106.34],
-      color: '#813c33'
+      position: [9.93, 106.34]
     },
     {
       key: 'ben-tre',
       name: 'Bến Tre trước đây',
-      position: [10.24, 106.38],
-      color: '#a87531'
+      position: [10.24, 106.38]
     },
     {
       key: 'vinh-long',
       name: 'Vĩnh Long trước đây',
-      position: [10.25, 105.97],
-      color: '#526047'
+      position: [10.25, 105.97]
     }
   ];
 
   places.forEach(function (place) {
-    const marker = L.circleMarker(place.position, {
-      radius: 8,
-      color: '#fffdf8',
-      weight: 2,
-      fillColor: place.color,
-      fillOpacity: 1
-    });
+    const marker = L.marker(place.position);
 
     marker.bindTooltip(place.name, {
       permanent: true,
@@ -126,40 +119,6 @@ function renderHistoricalRegionMarkers() {
     folkRegionMarkersLayer.addLayer(marker);
   });
 }
-
-
-const VIETNAM_BOUNDS = [
-  [7.5, 101.5],
-  [24, 115]
-];
-
-function showWholeVietnam() {
-  if (!folkMap) return;
-
-  folkMap.fitBounds(VIETNAM_BOUNDS, {
-    padding: [20, 20],
-    maxZoom: 6,
-    animate: false
-  });
-}
-
-const folkRegions = {
-  'tra-vinh': {
-    name: 'Trà Vinh trước đây',
-    center: [9.93, 106.34],
-    bounds: [9.4, 10.3, 105.7, 106.9]
-  },
-  'ben-tre': {
-    name: 'Bến Tre trước đây',
-    center: [10.24, 106.38],
-    bounds: [9.7, 10.7, 105.7, 107.0]
-  },
-  'vinh-long': {
-    name: 'Vĩnh Long trước đây',
-    center: [10.25, 105.97],
-    bounds: [9.7, 10.8, 105.4, 106.6]
-  }
-};
 
 function getIllustrativePoint(story) {
   const region = folkRegions[story.region];
@@ -268,13 +227,7 @@ L.tileLayer(
     ];
 
     islands.forEach(island => {
-      const marker = L.circleMarker(island.position, {
-        radius: 6,
-        color: '#8b3f27',
-        weight: 2,
-        fillColor: '#d9a441',
-        fillOpacity: 1
-      }).addTo(folkMap);
+    const marker = L.marker(island.position).addTo(folkMap);
 
       marker.bindTooltip(island.name, {
         permanent: true,
