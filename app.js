@@ -301,17 +301,9 @@ if (!$('map-region')?.value) {
 function showWholeVietnam() {
   if (!folkMap) return;
 
-  folkMap.fitBounds(
-    [
-      [8.0, 102.0],
-      [24.0, 110.0]
-    ],
-    {
-      padding: [20, 20],
-      maxZoom: 6,
-      animate: false
-    }
-  );
+  folkMap.setView([10.5, 106.0], 6, {
+    animate: false
+  });
 }
 
 
