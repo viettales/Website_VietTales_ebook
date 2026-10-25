@@ -261,7 +261,48 @@ crossorigin=""></script>
   </audio>
 </div>
 </article></div>
-<div class="backdrop" id="admin-modal" hidden><div class="modal admin"><button class="x" data-close="admin-modal">×</button><div class="admin-head"><div><span class="eyebrow">KHÔNG GIAN QUẢN LÝ</span><h2>Quản trị nội dung</h2><small id="admin-user"></small></div><button id="logout" class="button outline">Đăng xuất</button></div><div class="tabs"><button class="admin-tab selected" data-tab="list">Quản lý truyện</button><button class="admin-tab" data-tab="editor">Thêm truyện</button></div><section id="admin-list"><div class="list-head"><h3>Danh sách truyện</h3><button id="new-story" class="button primary">+ Thêm truyện</button></div><div id="admin-stories"></div></section><section id="admin-editor" hidden><h3 id="editor-title">Thêm truyện mới</h3><form id="story-form"><input type="hidden" id="story-id"><label>Tên truyện *</label><input id="story-name" required maxlength="200"><label>Thể loại *</label><select id="story-category"><option>Truyền Thuyết</option><option>Truyện Cười</option><option>Truyện Cổ Tích</option><option>Truyện Giải Thích Địa Phương</option><option>Truyện Ngụ Ngôn</option><option>Giai thoại</option><option>Truyện danh nhân</option></select><label>Mô tả ngắn</label><textarea id="story-summary" rows="2"></textarea><label>Tải tệp Word (.docx)</label><input type="file" id="docx" accept=".docx"><small>Văn bản được trích xuất vào ô nội dung bên dưới; hãy kiểm tra lại trước khi lưu.</small><label>Nội dung truyện *</label><textarea id="story-text" rows="10" required></textarea><label>Ảnh minh họa (không bắt buộc)</label><input type="file" id="story-image" accept="image/*">
+<div class="backdrop" id="admin-modal" hidden><div class="modal admin"><button class="x" data-close="admin-modal">×</button><div class="admin-head"><div><span class="eyebrow">KHÔNG GIAN QUẢN LÝ</span><h2>Quản trị nội dung</h2><small id="admin-user"></small></div><button id="logout" class="button outline">Đăng xuất</button></div><div class="tabs"><button class="admin-tab selected" data-tab="list">Quản lý truyện</button><button class="admin-tab" data-tab="editor">Thêm truyện</button></div><section id="admin-list"><div class="list-head"><h3>Danh sách truyện</h3><button id="new-story" class="button primary">+ Thêm truyện</button></div><div id="admin-stories"></div></section><section id="admin-editor" hidden><h3 id="editor-title">Thêm truyện mới</h3><form id="story-form"><input type="hidden" id="story-id"><label>Tên truyện *</label><input id="story-name" required maxlength="200"><label>Thể loại *</label><select id="story-category"><option>Truyền Thuyết</option><option>Truyện Cười</option><option>Truyện Cổ Tích</option><option>Truyện Giải Thích Địa Phương</option><option>Truyện Ngụ Ngôn</option><option>Giai thoại</option><option>Truyện danh nhân</option></select><label>Mô tả ngắn</label><textarea id="story-summary" rows="2"></textarea>
+  
+<label>Khu vực truyện *</label>
+<select id="story-region" required>
+  <option value="">-- Chọn khu vực --</option>
+  <option value="tra-vinh">Trà Vinh (khu vực cũ)</option>
+  <option value="ben-tre">Bến Tre (khu vực cũ)</option>
+  <option value="vinh-long">Vĩnh Long (khu vực cũ)</option>
+</select>
+
+<label>Kiểu hiển thị trên bản đồ *</label>
+<select id="story-map-mode" required>
+  <option value="none">Không hiển thị trên bản đồ</option>
+  <option value="real">Địa điểm có thật, đã xác minh</option>
+  <option value="illustrative">Vị trí minh họa trong khu vực</option>
+</select>
+
+<label>Tên địa điểm</label>
+<input id="story-place-name" type="text"
+  placeholder="Ví dụ: Ao Bà Om">
+
+<label>Xã/phường</label>
+<input id="story-ward" type="text"
+  placeholder="Nhập xã hoặc phường">
+
+<label>Đường/địa chỉ cụ thể</label>
+<input id="story-street" type="text"
+  placeholder="Nhập đường hoặc địa chỉ nếu có">
+
+<label>Vĩ độ (latitude)</label>
+<input id="story-latitude" type="number"
+  step="any" placeholder="Ví dụ: 9.934">
+
+<label>Kinh độ (longitude)</label>
+<input id="story-longitude" type="number"
+  step="any" placeholder="Ví dụ: 106.345">
+
+<small>
+  Với địa điểm có thật, cần xác minh tọa độ trước khi lưu.
+  Truyện không có địa điểm chính xác có thể chọn vị trí minh họa.
+</small>
+<label>Tải tệp Word (.docx)</label><input type="file" id="docx" accept=".docx"><small>Văn bản được trích xuất vào ô nội dung bên dưới; hãy kiểm tra lại trước khi lưu.</small><label>Nội dung truyện *</label><textarea id="story-text" rows="10" required></textarea><label>Ảnh minh họa (không bắt buộc)</label><input type="file" id="story-image" accept="image/*">
   <label>File nghe truyện MP3 (không bắt buộc)</label>
 <input type="file" id="story-audio" accept="audio/mpeg,.mp3">
 <small>Chọn file âm thanh để độc giả có thể nghe truyện trực tiếp trên website.</small>
