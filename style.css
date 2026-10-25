@@ -500,3 +500,50 @@ header .brand > div {
   }
 }
 
+
+/* ===== NÂNG CẤP BẢN ĐỒ SỐ VIETALES ===== */
+
+#folk-map {
+  background: #eee8dc;
+  border: 1px solid #d9cbb7;
+  box-shadow: 0 8px 24px #493b240a;
+}
+
+#folk-map .leaflet-tooltip {
+  background: #fffdf8;
+  color: #633027;
+  border: 1px solid #d9cbb7;
+  border-radius: 6px;
+  box-shadow: 0 3px 12px #493b2418;
+  padding: 5px 8px;
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+#folk-map .leaflet-tooltip::before {
+  border-top-color: #d9cbb7;
+}
+
+#folk-map .leaflet-popup-content-wrapper {
+  background: #fffdf8;
+  color: #292b26;
+  border-radius: 10px;
+}
+
+#folk-map .leaflet-popup-content {
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-size: 12px;
+  line-height: 1.8;
+}
+
+#folk-map .leaflet-popup-tip {
+  background: #fffdf8;
+}
+
+@media (max-width: 600px) {
+  #folk-map {
+    height: 400px;
+    min-height: 320px;
+  }
+}
