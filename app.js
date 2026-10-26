@@ -887,11 +887,7 @@ if (!results.length) {
   );
 }
 
-    const results=await response.json();
 
-    if(!results.length){
-      throw Error('Không tìm thấy địa điểm. Bé thử bổ sung địa chỉ cụ thể hơn nhé.');
-    }
 
     const lat=Number(results[0].lat);
     const lng=Number(results[0].lon);
