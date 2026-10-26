@@ -841,9 +841,11 @@ function renderAdminMapStories(){
   try{
   
 const queries = [
-  [place, regionInfo.name, 'Vietnam'],
-  [place, ward, regionInfo.name, 'Vietnam'],
-  [place, address, regionInfo.name, 'Vietnam']
+  `${place}, ${ward}, ${address}, ${regionInfo.name}, Vietnam`,
+  `${place}, ${ward}, ${regionInfo.name}, Vietnam`,
+  `${place}, ${regionInfo.name}, Vietnam`,
+  `${place}, Vinh Long, Vietnam`,
+  `${place}, Tra Vinh, Vietnam`
 ];
 
 let results = [];
