@@ -839,29 +839,44 @@ function renderAdminMapStories(){
   message.textContent='Đang xác minh địa điểm...';
 
   try{
-    const query=[
-      place,
-      ward,
-      address,
-      regionInfo.name,
-      'Vietnam'
-    ].filter(Boolean).join(', ');
+  
+const queries = [
+  [place, regionInfo.name, 'Vietnam'],
+  [place, ward, regionInfo.name, 'Vietnam'],
+  [place, address, regionInfo.name, 'Vietnam']
+];
 
-    const params=new URLSearchParams({
-      format:'jsonv2',
-      limit:'1',
-      countrycodes:'vn',
-      q:query
-    });
+let results = [];
 
-    const response=await fetch(
-      'https://nominatim.openstreetmap.org/search?'+params.toString(),
-      {headers:{'Accept':'application/json'}}
-    );
+for (const parts of queries) {
+  const query = parts.filter(Boolean).join(', ');
 
-    if(!response.ok){
-      throw Error('Dịch vụ tìm địa điểm đang gặp lỗi. Bé thử lại sau nhé.');
-    }
+  const params = new URLSearchParams({
+    format: 'jsonv2',
+    limit: '1',
+    countrycodes: 'vn',
+    q: query
+  });
+
+  const response = await fetch(
+    'https://nominatim.openstreetmap.org/search?' + params.toString(),
+    { headers: { Accept: 'application/json' } }
+  );
+
+  if (!response.ok) {
+    throw Error('Dịch vụ tìm địa điểm đang gặp lỗi. Bé thử lại sau nhé.');
+  }
+
+  results = await response.json();
+
+  if (results.length) break;
+}
+
+if (!results.length) {
+  throw Error(
+    'Chưa tìm được tọa độ. Bé thử nhập tên địa điểm kèm tỉnh hoặc thành phố nhé.'
+  );
+}
 
     const results=await response.json();
 
