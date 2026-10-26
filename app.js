@@ -858,10 +858,19 @@ for (const parts of queries) {
     q: query
   });
 
-  const response = await fetch(
+ 
+let response;
+
+try {
+  response = await fetch(
     'https://nominatim.openstreetmap.org/search?' + params.toString(),
     { headers: { Accept: 'application/json' } }
   );
+} catch (err) {
+  throw Error(
+    'Không kết nối được dịch vụ tìm địa điểm. Bé thử lại sau hoặc kiểm tra kết nối mạng nhé.'
+  );
+}
 
   if (!response.ok) {
     throw Error('Dịch vụ tìm địa điểm đang gặp lỗi. Bé thử lại sau nhé.');
