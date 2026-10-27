@@ -866,9 +866,7 @@ const queries = [
 ];
 
 let results = [];
-
-for (const parts of queries) {
-  const query = parts.filter(Boolean).join(', ');
+for (const query of queries) {
 
   const params = new URLSearchParams({
     format: 'jsonv2',
