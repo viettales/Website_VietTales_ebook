@@ -865,15 +865,17 @@ const queries = [
   `${place}, Tra Vinh, Vietnam`
 ];
 
-let results = [];
-for (const query of queries) {
 
+let results = [];
+
+for (const query of queries) {
   const params = new URLSearchParams({
     format: 'jsonv2',
     limit: '1',
     countrycodes: 'vn',
     q: query
   });
+
 
  
 let response;
