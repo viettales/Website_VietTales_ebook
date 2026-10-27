@@ -284,9 +284,9 @@ L.tileLayer(
       folkMap.zoomIn();
     });
 
-    $('map-zoom-out')?.addEventListener('click', () => {
-      folkMap.zoomOut();
-    });
+   $('map-zoom-out')?.addEventListener('click', () => {
+  folkMap.zoomOut();
+});
 
     $('map-show-all')?.addEventListener('click', () => {
       if (filter) filter.value = '';
@@ -301,110 +301,127 @@ L.tileLayer(
     });
   }
 
-  renderFolkMapMarkers();
+   renderFolkMapMarkers();
 
   requestAnimationFrame(() => {
     if (folkMap) {
       folkMap.invalidateSize();
-if (!$('map-region')?.value) {
-  showWholeVietnam();
-}
+
+      if (!$('map-region')?.value) {
+        showWholeVietnam();
+      }
     }
   });
 }
 
-
 function showWholeVietnam() {
   if (!folkMap) return;
 
-  folkMap.setView([10.5, 106.0], 6, {
-    animate: false
-  });
+  folkMap.fitBounds(
+    [[8.0, 102.0], [23.5, 110.0]],
+    {
+      padding: [20, 20],
+      animate: false
+    }
+  );
 }
 
-
 function renderFolkMapMarkers() {
+  const status = $('map-status');
+  const filter = $('map-region');
+
   if (!folkMap) return;
 
   folkMarkers.forEach(marker => marker.remove());
   folkMarkers = [];
 
-  const region = $('map-region')?.value || '';
-  const details = $('map-story-details');
+  const area = filter?.value || 'all';
 
-  let invalidRealCount = 0;
-  let visibleCount = 0;
+  const regionNames = {
+    'tra-vinh': 'Trà Vinh trước đây',
+    'ben-tre': 'Bến Tre trước đây',
+    'vinh-long': 'Vĩnh Long trước đây'
+  };
 
-  stories.forEach(story => {
-    if (!story.is_published) return;
-    if (region && story.region !== region) return;
-    if (story.map_mode === 'none') return;
+  const places = stories
+    .filter(s => s.is_published && s.region in regionNames)
+    .map(s => {
+      const point = getStoryMapPoint(s);
 
-    const point = getStoryMapPoint(story);
+      if (!point) return null;
 
-    if (!point) {
-      if (story.map_mode === 'real') invalidRealCount++;
-      return;
-    }
+      return {
+        id: s.id,
+        title: s.title || 'Truyện dân gian',
+        area: s.region,
+        areaLabel: regionNames[s.region],
+        place: s.place_name || s.street || 'Địa danh địa phương',
+        description: s.summary || 'Truyện dân gian gắn với địa phương.',
+        lat: point.lat,
+        lng: point.lng,
+        story: s,
+        illustrative: point.illustrative
+      };
+    })
+    .filter(p => p && (area === 'all' || p.area === area));
 
-    const regionInfo = folkRegions[story.region];
-    const placeName = story.place_name || 'Chưa ghi tên địa điểm';
+  places.forEach(place => {
+    const note = place.illustrative
+      ? '<p><i>Vị trí minh họa, không phải tọa độ thực tế.</i></p>'
+      : '';
 
-    const address = [story.ward, story.street]
-      .filter(Boolean)
-      .join(', ');
-
-    const label = point.illustrative
-      ? 'Vị trí minh họa — không phải nguồn gốc chính xác'
-      : 'Địa điểm có thật — tọa độ do người quản trị cung cấp';
-
-    const marker = L.marker([point.lat, point.lng]);
-
-    marker.bindPopup(`
-      <div class="map-detail">
-        <h3>${esc(story.title)}</h3>
-        <p><b>Khu vực:</b> ${esc(regionInfo.name)}</p>
-        <p><b>Địa điểm:</b> ${esc(placeName)}</p>
-        ${address ? `<p><b>Địa chỉ:</b> ${esc(address)}</p>` : ''}
-        <p>${esc(label)}</p>
-        <button type="button"
-          class="button primary"
-          data-story="${esc(story.id)}">
+    const popup = `
+      <div class="folk-popup">
+        <h3 class="folk-popup-title">${esc(place.title)}</h3>
+        <p class="folk-popup-region">${esc(place.areaLabel)}</p>
+        <p class="folk-popup-desc">
+          <b>Địa danh:</b> ${esc(place.place)}<br>
+          ${esc(place.description)}
+        </p>
+        ${note}
+        <button
+          type="button"
+          class="folk-popup-read"
+          data-story="${esc(place.id)}">
           Đọc truyện này →
         </button>
       </div>
-    `);
+    `;
 
+    const marker = L.marker([place.lat, place.lng])
+      .addTo(folkMap)
+      .bindPopup(popup);
 
-
-    marker._folkRegion = story.region;
-    marker.addTo(folkMap);
     folkMarkers.push(marker);
-    visibleCount++;
   });
 
-  if (details) {
-    if (!visibleCount) {
-      details.innerHTML = `
-        <p>Chưa có truyện đã xuất bản với vị trí bản đồ hợp lệ
-        trong khu vực này.</p>
-        ${invalidRealCount
-          ? `<p>${invalidRealCount} truyện chọn địa điểm có thật nhưng thiếu tọa độ hợp lệ hoặc tọa độ nằm ngoài phạm vi khu vực tham khảo.</p>`
-          : ''}
-      `;
-    } else {
-      details.innerHTML = `
-        <p>Đang hiển thị ${visibleCount} truyện trên bản đồ.
-        Chọn một điểm đánh dấu để xem thông tin và mở truyện.</p>
-        ${invalidRealCount
-          ? `<p>${invalidRealCount} truyện chưa hiển thị vì tọa độ chưa hợp lệ.</p>`
-          : ''}
-      `;
-    }
+  if (status) {
+    status.textContent = places.length
+      ? `Đang hiển thị ${places.length} địa điểm truyện trên bản đồ.`
+      : 'Chưa có truyện được gắn địa điểm trong khu vực này.';
   }
 
+  if (area === 'all') {
+    showWholeVietnam();
+  } else if (places.length > 0) {
+    const bounds = L.latLngBounds(
+      places.map(p => [p.lat, p.lng])
+    );
 
+    folkMap.fitBounds(bounds, {
+      padding: [25, 25],
+      maxZoom: 11
+    });
+  } else {
+    const region = folkRegions[area];
+
+    if (region) {
+      folkMap.setView(region.center, 9);
+    }
+  }
 }
+
+
 function filterFolkMap() {
   renderFolkMapMarkers();
 }
