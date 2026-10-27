@@ -419,6 +419,9 @@ function renderFolkMapMarkers() {
       folkMap.setView(region.center, 9);
     }
   }
+  
+
+
 }
 
 
@@ -1271,6 +1274,24 @@ document.querySelectorAll('nav a').forEach(a=>a.addEventListener('click',e=>{e.p
   });
 };document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>modal(b.dataset.close,false));document.querySelectorAll('.backdrop').forEach(b=>b.onclick=e=>{if(e.target===b)modal(b.id,false)});
 document.addEventListener('click',async e=>{
+    const mapReadButton = e.target.closest('.folk-popup-read');
+
+  if (mapReadButton) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const id = String(mapReadButton.dataset.story || '');
+    const storyCard = [...document.querySelectorAll('.card[data-story]')]
+      .find(card => String(card.dataset.story) === id);
+
+    if (storyCard) {
+      storyCard.click();
+    } else {
+      toast('Không tìm thấy thẻ truyện này. Bé kiểm tra lại danh sách truyện nhé.', true);
+    }
+
+    return;
+  }
   let fav=e.target.closest('[data-favorite]');
   if(fav){
     e.preventDefault();
