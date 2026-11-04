@@ -890,12 +890,12 @@ try {
   );
 } catch (err) {
   throw Error(
-    'Không kết nối được dịch vụ tìm địa điểm. Bé thử lại sau hoặc kiểm tra kết nối mạng nhé.'
+    'Không kết nối được dịch vụ tìm địa điểm. Thử lại sau hoặc kiểm tra kết nối mạng nhé.'
   );
 }
 
   if (!response.ok) {
-    throw Error('Dịch vụ tìm địa điểm đang gặp lỗi. Bé thử lại sau nhé.');
+    throw Error('Dịch vụ tìm địa điểm đang gặp lỗi. Thử lại sau nhé.');
   }
 
   results = await response.json();
@@ -905,7 +905,7 @@ try {
 
 if (!results.length) {
   throw Error(
-    'Chưa tìm được tọa độ. Bé thử nhập tên địa điểm kèm tỉnh hoặc thành phố nhé.'
+    'Chưa tìm được tọa độ. Thử nhập tên địa điểm kèm tỉnh hoặc thành phố nhé.'
   );
 }
 
@@ -922,7 +922,7 @@ if (!results.length) {
       lng<minLng||lng>maxLng
     ){
       throw Error(
-        'Kết quả tìm được nằm ngoài phạm vi khu vực đã chọn. Bé kiểm tra lại tên địa điểm hoặc khu vực nhé.'
+        'Kết quả tìm được nằm ngoài phạm vi khu vực đã chọn. Kiểm tra lại tên địa điểm hoặc khu vực nhé.'
       );
     }
 
