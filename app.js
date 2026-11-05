@@ -157,9 +157,20 @@ function renderHistoricalRegionMarkers() {
 function getIllustrativePoint(story) {
   const region = folkRegions[story.region];
 
-  if (!region || !region.bounds) return null;
+  if (!region) return null;
 
-  // Tạo vị trí ổn định theo mã truyện.
+  // Các điểm đại diện trên đất liền của từng khu vực.
+  const landPoints = {
+    'tra-vinh': [9.934, 106.345],
+    'ben-tre': [10.243, 106.375],
+    'vinh-long': [10.245, 105.972]
+  };
+
+  const base = landPoints[story.region];
+
+  if (!base) return null;
+
+  // Tạo độ lệch ổn định theo mã truyện.
   const key = String(story.id || story.title);
   let hash = 0;
 
@@ -167,24 +178,16 @@ function getIllustrativePoint(story) {
     hash = (hash * 31 + key.charCodeAt(i)) >>> 0;
   }
 
-  // Lấy giới hạn tọa độ của khu vực.
-  const [minLat, maxLat, minLng, maxLng] = region.bounds;
+  const latOffset = ((hash % 101) - 50) * 0.0002;
+  const lngOffset =
+    ((Math.floor(hash / 101) % 101) - 50) * 0.0002;
 
-  // Chừa khoảng cách nhỏ với ranh giới khu vực.
-  const paddingLat = (maxLat - minLat) * 0.08;
-  const paddingLng = (maxLng - minLng) * 0.08;
+  const lat = base[0] + latOffset;
+  const lng = base[1] + lngOffset;
 
-  const latRange = maxLat - minLat - paddingLat * 2;
-  const lngRange = maxLng - minLng - paddingLng * 2;
-
-  const latRatio = (hash % 10000) / 10000;
-  const lngRatio = (Math.floor(hash / 10000) % 10000) / 10000;
-
-  const lat = minLat + paddingLat + latRatio * latRange;
-  const lng = minLng + paddingLng + lngRatio * lngRange;
-console.log('TỌA ĐỘ MINH HỌA:', story.title, lat, lng);
   return [lat, lng];
 }
+
 
 function getStoryMapPoint(story) {
   if (!story.is_published || !story.region) return null;
