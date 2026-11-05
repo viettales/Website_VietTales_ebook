@@ -154,13 +154,12 @@ function renderHistoricalRegionMarkers() {
   });
 }
 
-
 function getIllustrativePoint(story) {
   const region = folkRegions[story.region];
 
-  if (!region) return null;
+  if (!region || !region.bounds) return null;
 
-  // Tạo vị trí ổn định từ mã truyện, không đổi khi tải lại.
+  // Tạo vị trí ổn định theo mã truyện.
   const key = String(story.id || story.title);
   let hash = 0;
 
@@ -168,14 +167,23 @@ function getIllustrativePoint(story) {
     hash = (hash * 31 + key.charCodeAt(i)) >>> 0;
   }
 
-  const latOffset = ((hash % 10000) / 10000 - 0.5) * 0.24;
-  const lngOffset =
-    (((Math.floor(hash / 10000)) % 10000) / 10000 - 0.5) * 0.30;
+  // Lấy giới hạn tọa độ của khu vực.
+  const [minLat, maxLat, minLng, maxLng] = region.bounds;
 
-  return [
-    region.center[0] + latOffset,
-    region.center[1] + lngOffset
-  ];
+  // Chừa khoảng cách nhỏ với ranh giới khu vực.
+  const paddingLat = (maxLat - minLat) * 0.08;
+  const paddingLng = (maxLng - minLng) * 0.08;
+
+  const latRange = maxLat - minLat - paddingLat * 2;
+  const lngRange = maxLng - minLng - paddingLng * 2;
+
+  const latRatio = (hash % 10000) / 10000;
+  const lngRatio = (Math.floor(hash / 10000) % 10000) / 10000;
+
+  const lat = minLat + paddingLat + latRatio * latRange;
+  const lng = minLng + paddingLng + lngRatio * lngRange;
+console.log('TỌA ĐỘ MINH HỌA:', story.title, lat, lng);
+  return [lat, lng];
 }
 
 function getStoryMapPoint(story) {
@@ -822,144 +830,157 @@ function renderAdminMapStories(){
   '[VietTales] folkRegions khả dụng:',
   typeof folkRegions
 );
-  async function addStoryToMap(e){
+ async function addStoryToMap(e) {
   e.preventDefault();
 
-  const message=$('map-story-message');
-  const id=$('map-story-select').value;
-  const region=$('map-story-region').value;
-  const place=$('map-story-place').value.trim();
-  const ward=$('map-story-ward').value.trim();
-  const address=$('map-story-address').value.trim();
+  const message = $('map-story-message');
+  const form = $('map-story-form');
 
-  if(!db||!admin||!user){
-    message.textContent='Vui lòng đăng nhập tài khoản quản trị.';
+  const id = $('map-story-select').value;
+  const region = $('map-story-region').value;
+  const place = $('map-story-place').value.trim();
+  const ward = $('map-story-ward').value.trim();
+  const address = $('map-story-address').value.trim();
+
+  if (!db || !admin || !user) {
+    message.textContent = 'Vui lòng đăng nhập tài khoản quản trị.';
     return;
   }
 
-  const story=stories.find(s=>String(s.id)===String(id));
+  const story = stories.find(s => String(s.id) === String(id));
 
-  if(!story||!story.is_published){
-    message.textContent='Vui lòng chọn một truyện đã xuất bản.';
+  if (!story || !story.is_published) {
+    message.textContent = 'Vui lòng chọn một truyện đã xuất bản.';
     return;
   }
 
-  const regionInfo=folkRegions[region];
+  const regionInfo = folkRegions[region];
 
-  if(!regionInfo||!place){
-    message.textContent='Vui lòng chọn khu vực và nhập tên địa điểm.';
+  if (!regionInfo) {
+    message.textContent = 'Vui lòng chọn khu vực.';
     return;
   }
 
-  const button=$('map-story-form').querySelector(
-    'button[type="submit"]'
-  );
+  const button = form.querySelector('button[type="submit"]');
 
-  button.disabled=true;
-  message.textContent='Đang xác minh địa điểm...';
+  if (button) button.disabled = true;
 
-  try{
-  
-const queries = [
-  `${place}, ${ward}, ${address}, ${regionInfo.name}, Vietnam`,
-  `${place}, ${ward}, ${regionInfo.name}, Vietnam`,
-  `${place}, ${regionInfo.name}, Vietnam`,
-  `${place}, Vinh Long, Vietnam`,
-  `${place}, Tra Vinh, Vietnam`
-];
+  try {
+    let lat = null;
+    let lng = null;
+    let mapMode = 'illustrative';
 
+    // Chỉ tìm tọa độ thật khi có nhập địa danh.
+    if (place || ward || address) {
+      message.textContent = 'Đang xác minh địa điểm...';
 
-let results = [];
+      const regionNames = {
+        'tra-vinh': 'Trà Vinh',
+        'ben-tre': 'Bến Tre',
+        'vinh-long': 'Vĩnh Long'
+      };
 
-for (const query of queries) {
-  const params = new URLSearchParams({
-    format: 'jsonv2',
-    limit: '1',
-    countrycodes: 'vn',
-    q: query
-  });
+      const query = [
+        place,
+        ward,
+        address,
+        regionNames[region],
+        'Vietnam'
+      ].filter(Boolean).join(', ');
 
+      try {
+        const params = new URLSearchParams({
+          format: 'jsonv2',
+          limit: '5',
+          countrycodes: 'vn',
+          q: query
+        });
 
- 
-let response;
+        const response = await fetch(
+          'https://nominatim.openstreetmap.org/search?' +
+          params.toString(),
+          {
+            headers: {
+              Accept: 'application/json'
+            }
+          }
+        );
 
-try {
-  response = await fetch(
-    'https://nominatim.openstreetmap.org/search?' + params.toString(),
-    { headers: { Accept: 'application/json' } }
-  );
-} catch (err) {
-  throw Error(
-    'Không kết nối được dịch vụ tìm địa điểm. Thử lại sau hoặc kiểm tra kết nối mạng nhé.'
-  );
-}
+        if (response.ok) {
+          const results = await response.json();
 
-  if (!response.ok) {
-    throw Error('Dịch vụ tìm địa điểm đang gặp lỗi. Thử lại sau nhé.');
-  }
+          const [minLat, maxLat, minLng, maxLng] =
+            regionInfo.bounds;
 
-  results = await response.json();
+          const valid = results.find(item => {
+            const a = Number(item.lat);
+            const b = Number(item.lon);
 
-  if (results.length) break;
-}
+            return (
+              Number.isFinite(a) &&
+              Number.isFinite(b) &&
+              a >= minLat && a <= maxLat &&
+              b >= minLng && b <= maxLng
+            );
+          });
 
-if (!results.length) {
-  throw Error(
-    'Chưa tìm được tọa độ. Thử nhập tên địa điểm kèm tỉnh hoặc thành phố nhé.'
-  );
-}
-
-
-
-    const lat=Number(results[0].lat);
-    const lng=Number(results[0].lon);
-
-    const [minLat,maxLat,minLng,maxLng]=regionInfo.bounds;
-
-    if(
-      !Number.isFinite(lat)||!Number.isFinite(lng)||
-      lat<minLat||lat>maxLat||
-      lng<minLng||lng>maxLng
-    ){
-      throw Error(
-        'Kết quả tìm được nằm ngoài phạm vi khu vực đã chọn. Kiểm tra lại tên địa điểm hoặc khu vực nhé.'
-      );
+          if (valid) {
+            lat = Number(valid.lat);
+            lng = Number(valid.lon);
+            mapMode = 'real';
+          }
+        }
+      } catch (err) {
+        console.warn('Không tìm được tọa độ thật:', err);
+      }
     }
 
-    message.textContent='Đã xác minh vị trí, đang lưu...';
+    // Không có tọa độ thật thì dùng vị trí minh họa.
+    if (mapMode === 'illustrative') {
+      message.textContent =
+        'Chưa có tọa độ thực tế. Đang tạo vị trí minh họa...';
+    } else {
+      message.textContent = 'Đã xác minh vị trí, đang lưu...';
+    }
 
-    const {error}=await db
+    const { error } = await db
       .from('stories')
       .update({
-        region:region,
-        map_mode:'real',
-        place_name:place,
-        ward:ward||null,
-        street:address||null,
-        latitude:lat,
-        longitude:lng
+        region: region,
+        map_mode: mapMode,
+        place_name: place || null,
+        ward: ward || null,
+        street: address || null,
+        latitude: lat,
+        longitude: lng
       })
-      .eq('id',story.id)
-      .eq('is_published',true);
+      .eq('id', story.id)
+      .eq('is_published', true);
 
-    if(error)throw error;
+    if (error) throw error;
 
-    $('map-story-form').reset();
+    form.reset();
+
     await adminList();
     renderAdminMapStories();
 
-    message.textContent='Đã thêm địa điểm vào bản đồ thành công!';
-    toast('Đã cập nhật địa điểm truyện.');
-
-    if(folkMap){
+    if (folkMap) {
       renderFolkMapMarkers();
     }
 
-  }catch(err){
-    console.error('Lỗi thêm truyện vào bản đồ:',err);
-    message.textContent=err.message||'Không thể thêm địa điểm vào bản đồ.';
-  }finally{
-    button.disabled=false;
+    message.textContent = mapMode === 'real'
+      ? 'Đã thêm truyện với tọa độ thực tế!'
+      : 'Đã thêm truyện với vị trí minh họa trong khu vực!';
+
+    toast('Đã cập nhật địa điểm truyện.');
+
+  } catch (err) {
+    console.error('Lỗi thêm truyện vào bản đồ:', err);
+
+    message.textContent =
+      err.message || 'Không thể thêm truyện vào bản đồ.';
+  } finally {
+    if (button) button.disabled = false;
   }
 }
 function reset(){
@@ -1456,6 +1477,13 @@ let ed=e.target.closest('[data-edit]');if(ed){edit(ed.dataset.edit);return}let p
     tab(b.dataset.tab);
   };
 });$('story-form').onsubmit=save;
+  const mapPlaceInput = $('map-story-place');
+
+if (mapPlaceInput) {
+  mapPlaceInput.required = false;
+  mapPlaceInput.placeholder =
+    'Có thể để trống nếu chỉ biết tỉnh/khu vực';
+}
  const mapForm = $('map-story-form');
 
 if (mapForm) {
