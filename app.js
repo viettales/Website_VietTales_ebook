@@ -648,6 +648,13 @@ async function load(){
     .order('created_at',{ascending:false});
 
   console.log('TRUYỆN TẢI ĐƯỢC:',data);
+  console.table(stories.map(s => ({
+  title: s.title,
+  published: s.is_published,
+  region: s.region,
+  map_mode: s.map_mode,
+  place: s.place_name
+})));
   console.log('LỖI SUPABASE:',error);
 
   if(error){
