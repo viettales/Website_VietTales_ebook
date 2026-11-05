@@ -646,25 +646,26 @@ async function load(){
     .select('*')
     .eq('is_published',true)
     .order('created_at',{ascending:false});
+console.log('TRUYỆN TẢI ĐƯỢC:', data);
+console.log('LỖI SUPABASE:', error);
 
-  console.log('TRUYỆN TẢI ĐƯỢC:',data);
-  console.table(stories.map(s => ({
+if (error) {
+  console.error(error);
+  render();
+  return;
+}
+
+stories = data || [];
+
+console.table(stories.map(s => ({
   title: s.title,
   published: s.is_published,
   region: s.region,
   map_mode: s.map_mode,
   place: s.place_name
 })));
-  console.log('LỖI SUPABASE:',error);
 
-  if(error){
-    console.error(error);
-    render();
-    return;
-  }
-
-  stories=data||[];
-  render();
+render();
 }
 
 function modal(id,open){$(id).hidden=!open;document.body.style.overflow=open?'hidden':''}
