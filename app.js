@@ -141,7 +141,12 @@ function renderHistoricalRegionMarkers() {
 
     folkMap.fitBounds(
       [[minLat, minLng], [maxLat, maxLng]],
-      { padding: [25, 25], maxZoom: 10, animate: false }
+     {
+  padding: [30, 30],
+  maxZoom: 11,
+  animate: true,
+  duration: 0.8
+}
     );
   } else {
     folkMap.setView(place.position, 9, { animate: false });
@@ -412,24 +417,29 @@ function renderFolkMapMarkers() {
       : 'Chưa có truyện được gắn địa điểm trong khu vực này.';
   }
 
+
   if (area === 'all') {
     showWholeVietnam();
-  } else if (places.length > 0) {
-    const bounds = L.latLngBounds(
-      places.map(p => [p.lat, p.lng])
-    );
-
-    folkMap.fitBounds(bounds, {
-      padding: [25, 25],
-      maxZoom: 11
-    });
   } else {
     const region = folkRegions[area];
 
-    if (region) {
-      folkMap.setView(region.center, 9);
+    if (region && region.bounds) {
+      const [minLat, maxLat, minLng, maxLng] = region.bounds;
+
+      folkMap.stop();
+
+      folkMap.fitBounds(
+        [[minLat, minLng], [maxLat, maxLng]],
+        {
+          padding: [30, 30],
+          maxZoom: 11,
+          animate: true,
+          duration: 0.8
+        }
+      );
     }
   }
+
   
 
 
