@@ -515,6 +515,7 @@ function normalize(s){
 function renderSearch(){
   const input=$('search-input');
   const category=$('search-category');
+  const region=$('search-region');
   const sort=$('search-sort');
   const results=$('search-results');
   const status=$('search-status');
@@ -524,21 +525,22 @@ function renderSearch(){
 
   const q=normalize(input.value);
   const c=category.value;
+  const r=region?region.value:'';
   const words=q.split(/\s+/).filter(Boolean);
   const order=sort?sort.value:'relevance';
 
-  clear.hidden=!input.value.trim()&&!c;
-
-  if(!q&&!c){
-    results.innerHTML='';
-    status.textContent='';
-    return;
-  }
+clear.hidden=!input.value.trim()&&!c&&!r;
+if(!q&&!c&&!r){
+  results.innerHTML='';
+  status.textContent='';
+  return;
+}
 
   const found=stories
     .filter(s=>{
-      if(!s.is_published)return false;
-      if(c&&s.category!==c)return false;
+     if(!s.is_published)return false;
+if(c&&s.category!==c)return false;
+if(r&&s.region!==r)return false;
 
       const doc=new DOMParser().parseFromString(
         s.content||'','text/html'
@@ -1263,35 +1265,40 @@ function initTheme(){
 async function init(){
   initTheme();
   await load();
+const searchInput=$('search-input');
+const searchCategory=$('search-category');
+const searchSort=$('search-sort');
+const searchRegion=$('search-region');
+const clearSearch=$('clear-search');
 
-  const searchInput=$('search-input');
-  const searchCategory=$('search-category');
-  const searchSort=$('search-sort');
-  const clearSearch=$('clear-search');
+if(searchInput){
+  searchInput.addEventListener('input',renderSearch);
+}
 
-  if(searchInput){
-    searchInput.addEventListener('input',renderSearch);
-  }
+if(searchCategory){
+  searchCategory.addEventListener('change',renderSearch);
+}
 
-  if(searchCategory){
-    searchCategory.addEventListener('change',renderSearch);
-  }
+if(searchSort){
+  searchSort.addEventListener('change',renderSearch);
+}
 
-  if(searchSort){
-    searchSort.addEventListener('change',renderSearch);
-  }
+if(searchRegion){
+  searchRegion.addEventListener('change',renderSearch);
+}
 
-  if(clearSearch){
-    clearSearch.addEventListener('click',()=>{
-      if(searchInput)searchInput.value='';
-      if(searchCategory)searchCategory.value='';
-      if(searchSort)searchSort.value='relevance';
+if(clearSearch){
+  clearSearch.addEventListener('click',()=>{
+    if(searchInput)searchInput.value='';
+    if(searchCategory)searchCategory.value='';
+    if(searchRegion)searchRegion.value='';
+    if(searchSort)searchSort.value='relevance';
 
-      renderSearch();
+    renderSearch();
 
-      if(searchInput)searchInput.focus();
-    });
-  }
+    if(searchInput)searchInput.focus();
+  });
+}
 document.querySelectorAll('nav a').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();history.pushState(null,'','#'+a.dataset.page);page(a.dataset.page)}));window.addEventListener('hashchange',()=>page((location.hash||'#trang-chu').slice(1)));page((location.hash||'#trang-chu').slice(1));$('menu-toggle').onclick=()=>$('nav').classList.toggle('open');$('open-auth').onclick=async()=>{if(user&&admin)await openAdmin();else modal('auth-modal',true)};$('login-tab').onclick=()=>authTab('login');$('signup-tab').onclick=()=>authTab('signup');$('auth-form').onsubmit=submitAuth;$('view-favorites').onclick=()=>{
   if(!user){
     modal('auth-modal',true);
@@ -1306,24 +1313,29 @@ document.querySelectorAll('nav a').forEach(a=>a.addEventListener('click',e=>{e.p
   });
 };document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>modal(b.dataset.close,false));document.querySelectorAll('.backdrop').forEach(b=>b.onclick=e=>{if(e.target===b)modal(b.id,false)});
 document.addEventListener('click',async e=>{
-    const mapReadButton = e.target.closest('.folk-popup-read');
+ const mapReadButton = e.target.closest('.folk-popup-read');
 
-  if (mapReadButton) {
-    e.preventDefault();
-    e.stopPropagation();
+if (mapReadButton) {
+  e.preventDefault();
+  e.stopPropagation();
 
-    const id = String(mapReadButton.dataset.story || '');
-    const storyCard = [...document.querySelectorAll('.card[data-story]')]
-      .find(card => String(card.dataset.story) === id);
+  const id = String(mapReadButton.dataset.story || '');
+  const story = stories.find(s => String(s.id) === id);
 
-    if (storyCard) {
-      storyCard.click();
-    } else {
-      toast('Không tìm thấy thẻ truyện này. Bé kiểm tra lại danh sách truyện nhé.', true);
-    }
-
+  if (!story) {
+    toast('Không tìm thấy nội dung truyện.', true);
     return;
   }
+
+  const trigger = document.createElement('div');
+  trigger.dataset.story = id;
+
+  document.body.appendChild(trigger);
+  trigger.click();
+  trigger.remove();
+
+  return;
+}
   let fav=e.target.closest('[data-favorite]');
   if(fav){
     e.preventDefault();
