@@ -511,6 +511,17 @@ function normalize(s){
     .trim();
 }
 
+  
+function normalizeRegion(value) {
+  const v = normalize(value).replace(/[^a-z0-9]/g, '');
+
+  if (v.includes('travinh')) return 'tra-vinh';
+  if (v.includes('bentre')) return 'ben-tre';
+  if (v.includes('vinhlong')) return 'vinh-long';
+
+  return '';
+}
+
 
 function renderSearch(){
   const input=$('search-input');
@@ -523,12 +534,24 @@ function renderSearch(){
 
   if(!input||!category||!results||!status||!clear)return;
 
-  const q=normalize(input.value);
-  const c=category.value;
-  const r=region?region.value:'';
-  const words=q.split(/\s+/).filter(Boolean);
-  const order=sort?sort.value:'relevance';
+const q=normalize(input.value);
+const c=category.value;
+const r=region?region.value:'';
+const words=q.split(/\s+/).filter(Boolean);
+const order=sort?sort.value:'relevance';
 
+console.log('KIỂM TRA TÌM KIẾM TỈNH:', {
+  tinhDangChon: r,
+  cacGiaTriTinhTrongDatabase: [...new Set(stories.map(s => s.region))],
+  ketQuaTheoTinh: stories
+    .filter(s => normalizeRegion(s.region) === r)
+    .map(s => ({
+      tenTruyen: s.title,
+      tinhGoc: s.region,
+      tinhSauChuanHoa: normalizeRegion(s.region),
+      daXuatBan: s.is_published
+    }))
+});
 clear.hidden=!input.value.trim()&&!c&&!r;
 if(!q&&!c&&!r){
   results.innerHTML='';
@@ -540,7 +563,8 @@ if(!q&&!c&&!r){
     .filter(s=>{
      if(!s.is_published)return false;
 if(c&&s.category!==c)return false;
-if(r&&s.region!==r)return false;
+
+if(r&&normalizeRegion(s.region)!==r)return false;
 
       const doc=new DOMParser().parseFromString(
         s.content||'','text/html'
@@ -552,8 +576,22 @@ if(r&&s.region!==r)return false;
       const content=normalize(doc.body.textContent);
       const author=normalize(s.author_name);
 
-      const all=[title,summary,cat,content,author].join(' ');
+    const place = normalize(s.place_name);
+const ward = normalize(s.ward);
+const street = normalize(s.street);
+const regionName = normalize(s.region);
 
+const all = [
+  title,
+  summary,
+  cat,
+  content,
+  author,
+  place,
+  ward,
+  street,
+  regionName
+].join(' ');
       return words.every(w=>all.includes(w));
     })
     .map(s=>{
