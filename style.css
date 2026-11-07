@@ -578,3 +578,72 @@ header .brand > div {
   padding: 0 !important;
   border-radius: 0 !important;
 }
+
+/* PHẦN TÌM HIỂU TRUYỆN DÂN GIAN */
+.folk-knowledge {
+  margin: 35px auto 0;
+  padding: 32px;
+  max-width: 1000px;
+  background: linear-gradient(135deg, #f8f0df, #fffaf0);
+  border: 1px solid #dfcba9;
+  border-radius: 18px;
+  box-shadow: 0 8px 24px rgba(80, 55, 25, 0.08);
+}
+
+.folk-knowledge h2 {
+  font-family: 'Playfair Display', serif;
+  color: #704b2c;
+  font-size: 28px;
+  margin: 12px 0 18px;
+}
+
+.folk-knowledge p {
+  color: #514333;
+  line-height: 1.9;
+  text-align: justify;
+  margin-bottom: 14px;
+}
+
+.folk-knowledge .note {
+  margin-top: 22px;
+  background: #efe2ca;
+  border-left: 4px solid #a77b45;
+  border-radius: 10px;
+  padding: 17px 20px;
+  line-height: 1.8;
+}
+
+.folk-sources {
+  margin-top: 24px;
+  padding-top: 18px;
+  border-top: 1px solid #dfcba9;
+  color: #6d573d;
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.folk-sources ul {
+  padding-left: 20px;
+  margin-bottom: 0;
+}
+
+.folk-sources a {
+  color: #895d30;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.folk-sources a:hover {
+  color: #b17b3e;
+}
+
+@media (max-width: 600px) {
+  .folk-knowledge {
+    padding: 22px 18px;
+    margin-top: 24px;
+  }
+
+  .folk-knowledge h2 {
+    font-size: 23px;
+  }
+}
