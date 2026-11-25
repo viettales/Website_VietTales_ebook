@@ -11,8 +11,7 @@ crossorigin=""></script>
 <script defer src="app.js"></script>
 
 </head>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><body><div class="stripe"></div><header>
+<body><div class="stripe"></div><header>
   
 <a class="brand" href="#trang-chu">
   <img src="logo khkt.png" alt="Logo VietTales" class="brand-logo">
@@ -56,8 +55,7 @@ crossorigin=""></script>
       <button type="button" id="clear-search" hidden>Xóa</button>
     </div>
 
-    <div class="search-options">
-      <label for="search-category">Thể loại:</label>
+
    
 <div class="search-options">
   <label for="search-category">Thể loại:</label>
@@ -381,11 +379,8 @@ crossorigin=""></script>
   <label class="check"><input id="featured" type="checkbox"> Hiển thị trong mục truyện nổi bật</label><label class="check"><input id="published" type="checkbox"> Xuất bản ngay sau khi lưu</label><div class="actions"><button type="button" id="cancel-edit" class="button outline">Hủy</button><button class="button primary" id="save-story">Lưu truyện</button></div><p id="story-message" class="message"></p></form></section>
 
 <section id="admin-map" hidden>
-  <h3>Thêm truyện vào bản đồ</h3>
-  <p>
-    Chọn truyện đã xuất bản, nhập tên địa điểm và địa chỉ
-    nếu có để đưa câu chuyện lên bản đồ số.
-  </p>
+  <h3>Đánh dấu địa điểm trên bản đồ</h3>
+  <p>Chọn truyện, chọn khu vực rồi nhấp vào bản đồ hoặc kéo ghim đến vị trí mong muốn.</p>
 
   <form id="map-story-form">
     <label for="map-story-select">Chọn truyện đã xuất bản *</label>
@@ -402,32 +397,34 @@ crossorigin=""></script>
     </select>
 
     <label for="map-story-place">Tên địa điểm *</label>
-    <input
-      id="map-story-place"
-      type="text"
-      placeholder="Ví dụ: Ao Bà Om"
-      required
-    >
+    <input id="map-story-place" type="text"
+      placeholder="Ví dụ: Ao Bà Om" required>
 
-    <label for="map-story-ward">Xã/phường (nếu có)</label>
-    <input
-      id="map-story-ward"
-      type="text"
-      placeholder="Tên xã hoặc phường"
-    >
+    <label for="map-story-ward">Xã/phường</label>
+    <input id="map-story-ward" type="text"
+      placeholder="Tên xã hoặc phường">
 
-    <label for="map-story-address">Địa chỉ (nếu có)</label>
-    <input
-      id="map-story-address"
-      type="text"
-      placeholder="Đường, xã/phường, tỉnh..."
-    >
+    <label for="map-story-address">Đường/địa chỉ</label>
+    <input id="map-story-address" type="text"
+      placeholder="Địa chỉ cụ thể nếu có">
 
-    <button type="submit" class="button primary">
-      Thêm vào bản đồ
+    <div class="map-picker-heading">
+      <b>Chọn vị trí đánh dấu</b>
+      <small>Nhấp vào bản đồ để đặt ghim hoặc kéo ghim đến đúng vị trí.</small>
+    </div>
+
+    <div id="admin-map-picker"
+      aria-label="Bản đồ chọn vị trí truyện"></div>
+
+    <p id="map-picker-coordinates" class="map-picker-coordinates">
+      Chưa chọn vị trí.
+    </p>
+
+    <button type="button" id="save-map-location"
+      class="button primary">
+      Lưu vị trí
     </button>
 
     <p id="map-story-message" class="message"></p>
   </form>
 </section>
-</div></div><div id="toast" role="status"></div></body></html>
