@@ -803,10 +803,15 @@ function tab(name){
   $('admin-list').hidden=name!=='list';
   $('admin-editor').hidden=name!=='editor';
   $('admin-map').hidden=name!=='map';
+if(name==='map'){
+  renderAdminMapStories();
 
-  if(name==='map'){
-    renderAdminMapStories();
-  }
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      initAdminMapPicker();
+    });
+  });
+}
 }
 function updateAdminStats(data){
   const total=data.length;
@@ -887,6 +892,148 @@ function renderAdminMapStories(){
     select.value=oldValue;
   }
 }
+  /* ===== BAN DO CHON VI TRI QUAN TRI ===== */
+
+let adminPickerMap = null;
+let adminPickerMarker = null;
+let selectedMapPoint = null;
+let adminRegionListenerAdded = false;
+
+function showAdminPickerCoordinates(lat, lng) {
+  const box = $('map-picker-coordinates');
+
+  if (box) {
+    box.textContent =
+      `Vĩ độ: ${lat.toFixed(6)} | Kinh độ: ${lng.toFixed(6)}`;
+  }
+}
+
+function setAdminPickerPoint(lat, lng) {
+  const regionKey = $('map-story-region')?.value;
+  const region = folkRegions[regionKey];
+
+  if (!region) {
+    toast('Em hãy chọn khu vực trước nhé.', true);
+    return;
+  }
+
+  const [minLat, maxLat, minLng, maxLng] = region.bounds;
+
+  if (
+    lat < minLat || lat > maxLat ||
+    lng < minLng || lng > maxLng
+  ) {
+    toast('Vị trí này nằm ngoài khu vực đã chọn.', true);
+    return;
+  }
+
+  selectedMapPoint = { lat, lng };
+
+  if (!adminPickerMarker) {
+    adminPickerMarker = L.marker([lat, lng], {
+      draggable: true
+    }).addTo(adminPickerMap);
+
+    adminPickerMarker.on('dragend', function () {
+      const point = adminPickerMarker.getLatLng();
+
+      const [a, b, c, d] =
+        folkRegions[$('map-story-region').value].bounds;
+
+      if (
+        point.lat < a || point.lat > b ||
+        point.lng < c || point.lng > d
+      ) {
+        adminPickerMarker.setLatLng([
+          selectedMapPoint.lat,
+          selectedMapPoint.lng
+        ]);
+
+        toast('Ghim phải nằm trong khu vực đã chọn.', true);
+        return;
+      }
+
+      selectedMapPoint = {
+        lat: point.lat,
+        lng: point.lng
+      };
+
+      showAdminPickerCoordinates(point.lat, point.lng);
+    });
+  } else {
+    adminPickerMarker.setLatLng([lat, lng]);
+  }
+
+  showAdminPickerCoordinates(lat, lng);
+}
+
+function initAdminMapPicker() {
+  const el = $('admin-map-picker');
+
+  if (!el || !window.L) return;
+
+  if (!adminPickerMap) {
+    adminPickerMap = L.map(el).setView([10.0, 106.2], 8);
+
+    L.tileLayer(
+      'https://basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png',
+      {
+        attribution:
+          '&copy; OpenStreetMap contributors &copy; CARTO',
+        maxZoom: 20
+      }
+    ).addTo(adminPickerMap);
+
+    adminPickerMap.on('click', function (e) {
+      setAdminPickerPoint(e.latlng.lat, e.latlng.lng);
+    });
+  }
+
+  requestAnimationFrame(() => {
+    adminPickerMap.invalidateSize();
+
+    const regionKey = $('map-story-region')?.value;
+    const region = folkRegions[regionKey];
+
+    if (region) {
+      const [minLat, maxLat, minLng, maxLng] = region.bounds;
+
+      adminPickerMap.fitBounds(
+        [[minLat, minLng], [maxLat, maxLng]],
+        { padding: [20, 20] }
+      );
+    }
+  });
+
+  if (!adminRegionListenerAdded) {
+    $('map-story-region')?.addEventListener('change', function () {
+      const region = folkRegions[this.value];
+
+      selectedMapPoint = null;
+
+      if (adminPickerMarker) {
+        adminPickerMap.removeLayer(adminPickerMarker);
+        adminPickerMarker = null;
+      }
+
+      if ($('map-picker-coordinates')) {
+        $('map-picker-coordinates').textContent =
+          'Chưa chọn vị trí.';
+      }
+
+      if (region) {
+        const [minLat, maxLat, minLng, maxLng] = region.bounds;
+
+        adminPickerMap.fitBounds(
+          [[minLat, minLng], [maxLat, maxLng]],
+          { padding: [20, 20] }
+        );
+      }
+    });
+
+    adminRegionListenerAdded = true;
+  }
+}
   console.log(
   '[VietTales] folkRegions khả dụng:',
   typeof folkRegions
@@ -922,79 +1069,87 @@ function renderAdminMapStories(){
     return;
   }
 
-  const button = form.querySelector('button[type="submit"]');
+const button = $('save-map-location');
 
   if (button) button.disabled = true;
 
   try {
-    let lat = null;
-    let lng = null;
-    let mapMode = 'illustrative';
+  let lat = null;
+let lng = null;
+let mapMode = 'illustrative';
 
-    // Chỉ tìm tọa độ thật khi có nhập địa danh.
-    if (place || ward || address) {
-      message.textContent = 'Đang xác minh địa điểm...';
+// Ưu tiên tọa độ do người quản trị đặt ghim.
+if (selectedMapPoint) {
+  lat = selectedMapPoint.lat;
+  lng = selectedMapPoint.lng;
+  mapMode = 'real';
+}
 
-      const regionNames = {
-        'tra-vinh': 'Trà Vinh',
-        'ben-tre': 'Bến Tre',
-        'vinh-long': 'Vĩnh Long'
-      };
+// Nếu chưa đặt ghim thì mới thử tìm tọa độ theo địa danh.
+if (!selectedMapPoint && (place || ward || address)) {
+  message.textContent = 'Đang xác minh địa điểm...';
 
-      const query = [
-        place,
-        ward,
-        address,
-        regionNames[region],
-        'Vietnam'
-      ].filter(Boolean).join(', ');
+  const regionNames = {
+    'tra-vinh': 'Trà Vinh',
+    'ben-tre': 'Bến Tre',
+    'vinh-long': 'Vĩnh Long'
+  };
 
-      try {
-        const params = new URLSearchParams({
-          format: 'jsonv2',
-          limit: '5',
-          countrycodes: 'vn',
-          q: query
-        });
+  const query = [
+    place,
+    ward,
+    address,
+    regionNames[region],
+    'Vietnam'
+  ].filter(Boolean).join(', ');
 
-        const response = await fetch(
-          'https://nominatim.openstreetmap.org/search?' +
-          params.toString(),
-          {
-            headers: {
-              Accept: 'application/json'
-            }
-          }
+  try {
+    const params = new URLSearchParams({
+      format: 'jsonv2',
+      limit: '5',
+      countrycodes: 'vn',
+      q: query
+    });
+
+    const response = await fetch(
+      'https://nominatim.openstreetmap.org/search?' +
+      params.toString(),
+      {
+        headers: { Accept: 'application/json' }
+      }
+    );
+
+    if (response.ok) {
+      const results = await response.json();
+
+      const [minLat, maxLat, minLng, maxLng] =
+        regionInfo.bounds;
+
+      const valid = results.find(item => {
+        const a = Number(item.lat);
+        const b = Number(item.lon);
+
+        return (
+          Number.isFinite(a) &&
+          Number.isFinite(b) &&
+          a >= minLat && a <= maxLat &&
+          b >= minLng && b <= maxLng
         );
+      });
 
-        if (response.ok) {
-          const results = await response.json();
-
-          const [minLat, maxLat, minLng, maxLng] =
-            regionInfo.bounds;
-
-          const valid = results.find(item => {
-            const a = Number(item.lat);
-            const b = Number(item.lon);
-
-            return (
-              Number.isFinite(a) &&
-              Number.isFinite(b) &&
-              a >= minLat && a <= maxLat &&
-              b >= minLng && b <= maxLng
-            );
-          });
-
-          if (valid) {
-            lat = Number(valid.lat);
-            lng = Number(valid.lon);
-            mapMode = 'real';
-          }
-        }
-      } catch (err) {
-        console.warn('Không tìm được tọa độ thật:', err);
+      if (valid) {
+        lat = Number(valid.lat);
+        lng = Number(valid.lon);
+        mapMode = 'real';
       }
     }
+  } catch (err) {
+    console.warn('Không tìm được tọa độ thật:', err);
+  }
+}
+
+
+
 
     // Không có tọa độ thật thì dùng vị trí minh họa.
     if (mapMode === 'illustrative') {
@@ -1020,7 +1175,19 @@ function renderAdminMapStories(){
 
     if (error) throw error;
 
-    form.reset();
+form.reset();
+
+selectedMapPoint = null;
+
+if (adminPickerMarker) {
+  adminPickerMap.removeLayer(adminPickerMarker);
+  adminPickerMarker = null;
+}
+
+if ($('map-picker-coordinates')) {
+  $('map-picker-coordinates').textContent =
+    'Chưa chọn vị trí.';
+}
 
     await adminList();
     renderAdminMapStories();
@@ -1587,6 +1754,13 @@ if (audioInput) {
   };
 }
 
+  const saveMapButton = $('save-map-location');
+
+if (saveMapButton) {
+  saveMapButton.onclick = async function(e) {
+    await addStoryToMap(e);
+  };
+}
 const videoInput = $('story-video');
 if (videoInput) {
   videoInput.onchange = e => {
